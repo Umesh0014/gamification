@@ -894,13 +894,321 @@
     .btn-cancel:hover { background: var(--border-light); }
     .btn-confirm:hover { background: var(--accent-light); transform: translateY(-1px); }
 
+    /* ========== TAB NAV ========== */
+    .tab-nav {
+      max-width: 860px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-btn:not(.active):hover { color: var(--text); background: var(--bg); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ========== DASHBOARD ========== */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .dash-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dash-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .dash-card-value {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .dash-card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .dash-card-trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    .trend-up { color: var(--green); background: var(--green-bg); }
+    .trend-down { color: var(--red); background: var(--red-bg); }
+    .trend-same { color: var(--text-muted); background: var(--bg); }
+
+    /* Bar Chart */
+    .chart-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 160px;
+      padding-top: 10px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar {
+      width: 100%;
+      max-width: 36px;
+      border-radius: 6px 6px 2px 2px;
+      background: var(--accent);
+      transition: height 0.3s ease;
+      min-height: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .bar:hover { opacity: 0.8; }
+
+    .bar-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .bar-value {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Category Breakdown */
+    .cat-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cat-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cat-bar-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      min-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--border-light);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.4s ease;
+    }
+
+    .cat-bar-pct {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* Heatmap */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: var(--border-light);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .heatmap-cell:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .heatmap-cell.l1 { background: #e9d5ff; }
+    .heatmap-cell.l2 { background: #c084fc; }
+    .heatmap-cell.l3 { background: #a855f7; }
+    .heatmap-cell.l4 { background: var(--accent); }
+
+    .heatmap-labels {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .heatmap-labels span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+
+    .heatmap-legend span {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .heatmap-legend-box {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* Top items */
+    .top-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+
+    .top-item-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .top-item-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .top-item-score {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dash-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      margin-top: 8px;
+    }
+
     /* ========== RESPONSIVE ========== */
     @media (max-width: 640px) {
       .score-bar-inner { flex-direction: column; align-items: stretch; }
       .total-score { display: flex; align-items: center; justify-content: space-between; }
       .score-breakdown { grid-template-columns: repeat(3, 1fr); }
       .header-inner { padding: 12px 16px; }
-      .score-bar, .container { padding: 0 16px; }
+      .score-bar, .container, .tab-nav { padding: 0 16px; }
+      .dash-grid { grid-template-columns: repeat(2, 1fr); }
+      .cat-bar-name { min-width: 80px; }
       .login-card { padding: 40px 28px; }
     }
   </style>
@@ -948,6 +1256,14 @@
     </div>
   </div>
 </div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('tracker')">Tracker</button>
+  <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard</button>
+</div>
+
+<!-- TRACKER TAB -->
+<div class="tab-content active" id="tab-tracker">
 
 <div class="score-bar">
   <div class="score-bar-inner">
@@ -1008,6 +1324,62 @@
     <div id="historyList" style="margin-top:16px;"></div>
   </div>
 </div>
+
+</div>
+<!-- END TRACKER TAB -->
+
+<!-- DASHBOARD TAB -->
+<div class="tab-content" id="tab-dashboard">
+  <div class="container" style="margin-top:24px;">
+
+    <!-- KPI Cards -->
+    <div class="dash-grid" id="dashKPIs"></div>
+
+    <!-- Weekly Bar Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Daily Scores - Last 14 Days</div>
+      <div class="bar-chart" id="dashBarChart"></div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="chart-container">
+      <div class="chart-title">Category Performance (Last 7 Days Avg)</div>
+      <div class="cat-breakdown" id="dashCatBreakdown"></div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="chart-container">
+      <div class="chart-title">Consistency Heatmap - Last 8 Weeks</div>
+      <div class="heatmap-labels">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div class="heatmap-grid" id="dashHeatmap"></div>
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <div class="heatmap-legend-box" style="background:var(--border-light)"></div>
+        <div class="heatmap-legend-box" style="background:#e9d5ff"></div>
+        <div class="heatmap-legend-box" style="background:#c084fc"></div>
+        <div class="heatmap-legend-box" style="background:#a855f7"></div>
+        <div class="heatmap-legend-box" style="background:var(--accent)"></div>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- Top & Bottom Items -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div class="chart-container" style="margin-bottom:0">
+        <div class="chart-title">Most Consistent Items</div>
+        <div class="top-items-list" id="dashTopItems"></div>
+      </div>
+      <div class="chart-container" style="margin-bottom:0">
+        <div class="chart-title">Needs Improvement</div>
+        <div class="top-items-list" id="dashBottomItems"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- END DASHBOARD TAB -->
 
 </div>
 
@@ -1434,6 +1806,179 @@ function renderHistory() {
 
   streakEl.innerHTML = streakHtml;
   listEl.innerHTML = html || '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No data yet. Start tracking today!</div>';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'dashboard') renderDashboard();
+}
+
+function renderDashboard() {
+  const cats = getCategories();
+
+  // Gather 30 days of data
+  const daysData = [];
+  for (let i = 0; i < 30; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dayData = getDayData(d);
+    let total = 0, max = 0;
+    const catScores = {};
+    cats.forEach(cat => {
+      const s = getCategoryScore(cat, dayData);
+      const m = getCategoryMax(cat);
+      total += s;
+      max += m;
+      catScores[cat.id] = { score: s, max: m };
+    });
+    daysData.push({ date: d, dayData, total, max, pct: max > 0 ? total / max : 0, catScores });
+  }
+
+  // ===== KPI CARDS =====
+  const today = daysData[0];
+  const thisWeek = daysData.slice(0, 7);
+  const lastWeek = daysData.slice(7, 14);
+
+  const thisWeekAvg = thisWeek.reduce((s, d) => s + d.pct, 0) / thisWeek.length;
+  const lastWeekAvg = lastWeek.reduce((s, d) => s + d.pct, 0) / lastWeek.length;
+  const weekTrend = thisWeekAvg - lastWeekAvg;
+
+  const activeDays = daysData.filter(d => d.total > 0).length;
+  let streak = 0;
+  for (let i = 0; i < daysData.length; i++) {
+    if (daysData[i].total > 0) streak++;
+    else break;
+  }
+
+  const bestDay = daysData.reduce((best, d) => d.pct > best.pct ? d : best, daysData[0]);
+
+  const trendHtml = (val) => {
+    if (val > 0.01) return `<div class="dash-card-trend trend-up">&#9650; ${Math.round(val*100)}%</div>`;
+    if (val < -0.01) return `<div class="dash-card-trend trend-down">&#9660; ${Math.round(Math.abs(val)*100)}%</div>`;
+    return `<div class="dash-card-trend trend-same">&#8212; Same</div>`;
+  };
+
+  document.getElementById('dashKPIs').innerHTML = `
+    <div class="dash-card">
+      <div class="dash-card-label">Today's Score</div>
+      <div class="dash-card-value" style="color:${today.pct >= 0.8 ? 'var(--green)' : today.pct >= 0.5 ? 'var(--amber)' : 'var(--accent)'}">${today.total}</div>
+      <div class="dash-card-sub">out of ${today.max}</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-label">Weekly Average</div>
+      <div class="dash-card-value" style="color:var(--accent)">${Math.round(thisWeekAvg * 100)}%</div>
+      ${trendHtml(weekTrend)}
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-label">Current Streak</div>
+      <div class="dash-card-value" style="color:var(--amber)">${streak}</div>
+      <div class="dash-card-sub">day${streak !== 1 ? 's' : ''} in a row</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-label">Best Day</div>
+      <div class="dash-card-value" style="color:var(--green)">${Math.round(bestDay.pct * 100)}%</div>
+      <div class="dash-card-sub">${formatDate(bestDay.date)}</div>
+    </div>
+  `;
+
+  // ===== BAR CHART (14 days) =====
+  const last14 = daysData.slice(0, 14).reverse();
+  const maxScore = Math.max(...last14.map(d => d.total), 1);
+  const dayNames = ['S','M','T','W','T','F','S'];
+
+  document.getElementById('dashBarChart').innerHTML = last14.map(d => {
+    const h = Math.max(2, (d.total / maxScore) * 140);
+    const color = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--accent)' : 'var(--border)';
+    return `<div class="bar-col">
+      <div class="bar-value">${d.total}</div>
+      <div class="bar" style="height:${h}px;background:${color}" title="${formatDate(d.date)}: ${d.total}/${d.max}"></div>
+      <div class="bar-label">${dayNames[d.date.getDay()]}</div>
+    </div>`;
+  }).join('');
+
+  // ===== CATEGORY BREAKDOWN (7 day avg) =====
+  const catAvgs = cats.map(cat => {
+    let totalScore = 0, totalMax = 0;
+    thisWeek.forEach(d => {
+      const cs = d.catScores[cat.id];
+      if (cs) { totalScore += cs.score; totalMax += cs.max; }
+    });
+    const pct = totalMax > 0 ? totalScore / totalMax : 0;
+    return { cat, pct, totalScore, totalMax };
+  }).sort((a, b) => b.pct - a.pct);
+
+  document.getElementById('dashCatBreakdown').innerHTML = catAvgs.map(({ cat, pct }) => `
+    <div class="cat-bar-row">
+      <div class="cat-bar-name">${cat.icon} ${cat.name}</div>
+      <div class="cat-bar-track">
+        <div class="cat-bar-fill" style="width:${Math.round(pct*100)}%;background:${cat.color}"></div>
+      </div>
+      <div class="cat-bar-pct" style="color:${pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : 'var(--accent)'}">${Math.round(pct*100)}%</div>
+    </div>
+  `).join('');
+
+  // ===== HEATMAP (56 days / 8 weeks) =====
+  const heatmapDays = [];
+  const startDay = new Date();
+  // Go back to last Sunday
+  startDay.setDate(startDay.getDate() - startDay.getDay() - 49);
+  for (let i = 0; i < 56; i++) {
+    const d = new Date(startDay);
+    d.setDate(d.getDate() + i);
+    const dayData = getDayData(d);
+    let total = 0, max = 0;
+    cats.forEach(cat => {
+      total += getCategoryScore(cat, dayData);
+      max += getCategoryMax(cat);
+    });
+    const pct = max > 0 ? total / max : 0;
+    let level = '';
+    if (pct > 0.8) level = 'l4';
+    else if (pct > 0.6) level = 'l3';
+    else if (pct > 0.3) level = 'l2';
+    else if (pct > 0) level = 'l1';
+    heatmapDays.push({ d, pct, level, total, max });
+  }
+
+  document.getElementById('dashHeatmap').innerHTML = heatmapDays.map(h =>
+    `<div class="heatmap-cell ${h.level}" title="${formatDate(h.d)}: ${h.total}/${h.max} (${Math.round(h.pct*100)}%)"></div>`
+  ).join('');
+
+  // ===== TOP & BOTTOM ITEMS =====
+  const itemStats = [];
+  cats.forEach(cat => {
+    cat.items.forEach(item => {
+      let completed = 0;
+      thisWeek.forEach(d => {
+        const val = d.dayData[item.id] || 0;
+        if (val >= item.points) completed++;
+      });
+      itemStats.push({ name: item.name, icon: cat.icon, completed, total: 7, pct: completed / 7 });
+    });
+  });
+
+  const sorted = [...itemStats].sort((a, b) => b.pct - a.pct);
+  const top5 = sorted.slice(0, 5);
+  const bottom5 = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5);
+
+  document.getElementById('dashTopItems').innerHTML = top5.map((item, i) => `
+    <div class="top-item-row">
+      <div class="top-item-rank">${i + 1}</div>
+      <div class="top-item-name">${item.icon} ${item.name}</div>
+      <div class="top-item-score" style="color:var(--green)">${item.completed}/7</div>
+    </div>
+  `).join('') || '<div style="color:var(--text-muted);font-size:12px;padding:12px">No data yet</div>';
+
+  document.getElementById('dashBottomItems').innerHTML = bottom5.map((item, i) => `
+    <div class="top-item-row">
+      <div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i + 1}</div>
+      <div class="top-item-name">${item.icon} ${item.name}</div>
+      <div class="top-item-score" style="color:var(--red)">${item.completed}/7</div>
+    </div>
+  `).join('') || '<div style="color:var(--text-muted);font-size:12px;padding:12px">No data yet</div>';
 }
 
 function toggleDataTable() {
