@@ -1287,6 +1287,7 @@
 
 <div class="container">
   <button class="add-category-btn" onclick="openAddCategoryModal()">+ Add Category</button>
+  <button class="add-category-btn" onclick="resetToDefaults()" style="border-color:#e9d5ff;color:var(--accent);">Reset to Default Categories</button>
 </div>
 
 <div class="container">
@@ -1565,9 +1566,21 @@ function userPrefix() { return currentUser ? currentUser.uid + '_' : ''; }
 function getCategories() {
   const key = userPrefix() + 'timebox_categories';
   const saved = localStorage.getItem(key);
-  if (saved) return JSON.parse(saved);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed && parsed.length > 0) return parsed;
+  }
+  // No categories saved or empty array — load defaults
   localStorage.setItem(key, JSON.stringify(DEFAULT_CATEGORIES));
   return JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+}
+
+function resetToDefaults() {
+  if (!confirm('This will replace all your categories with the defaults. Continue?')) return;
+  const key = userPrefix() + 'timebox_categories';
+  localStorage.setItem(key, JSON.stringify(DEFAULT_CATEGORIES));
+  saveCategories(JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)));
+  render();
 }
 
 function saveCategories(cats) {
