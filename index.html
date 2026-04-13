@@ -1437,7 +1437,25 @@ document.addEventListener('click', function(e) {
   }
 });
 
-auth.onAuthStateChanged(function(user) {
+async function syncFromFirestore(user) {
+  try {
+    // Sync categories
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists && userDoc.data().categories) {
+      localStorage.setItem(user.uid + '_timebox_categories', userDoc.data().categories);
+    }
+
+    // Sync last 30 days of data
+    const daysSnap = await db.collection('users').doc(user.uid).collection('days').get();
+    daysSnap.forEach(doc => {
+      localStorage.setItem(user.uid + '_timebox_' + doc.id, JSON.stringify(doc.data()));
+    });
+  } catch (e) {
+    console.log('Firestore sync error:', e);
+  }
+}
+
+auth.onAuthStateChanged(async function(user) {
   if (user) {
     currentUser = user;
     document.getElementById('loginScreen').style.display = 'none';
@@ -1445,6 +1463,9 @@ auth.onAuthStateChanged(function(user) {
     document.getElementById('userAvatar').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'U') + '&background=7c3aed&color=fff';
     document.getElementById('userName').textContent = user.displayName || 'User';
     document.getElementById('userEmail').textContent = user.email;
+
+    // Pull data from Firestore first, then render
+    await syncFromFirestore(user);
     render();
   } else {
     currentUser = null;
