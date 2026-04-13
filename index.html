@@ -1791,11 +1791,6 @@ function renderDashboard() {
       <div class="dash-card-value" style="color:var(--amber)">${streak}</div>
       <div class="dash-card-sub">day${streak !== 1 ? 's' : ''} in a row</div>
     </div>
-    <div class="dash-card">
-      <div class="dash-card-label">Best Day</div>
-      <div class="dash-card-value" style="color:var(--green)">${Math.round(bestDay.pct * 100)}%</div>
-      <div class="dash-card-sub">${formatDate(bestDay.date)}</div>
-    </div>
   `;
 
   // ===== BAR CHART (14 days) =====
