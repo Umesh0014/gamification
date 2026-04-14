@@ -1022,10 +1022,6 @@ function openTemplatePicker(isOnboarding) {
       <div class="tpl-card-meta">
         ${t.habits.length} habits · ${pts} pts
       </div>
-      <div class="tpl-card-meta" style="margin-top:4px">
-        ${pillars.map(p=>`<span class="tpl-pill" style="background:${pillarBgs[p]};color:${pillarFgs[p]}">${p}</span>`).join('')}
-        ${blocks.map(b=>blockIcons[b]||'').join(' ')}
-      </div>
     </div>`;
   }).join('');
 
@@ -1049,9 +1045,8 @@ function previewTemplate(id) {
       <div style="display:flex;align-items:center;gap:6px">
         <span>${h.icon}</span>
         <span>${h.name}</span>
-        <span class="tpl-pill" style="background:${pillarFgs[h.pillar]}15;color:${pillarFgs[h.pillar]}">${h.pillar}</span>
       </div>
-      <div style="color:var(--text-muted);font-size:11px">${h.points}pts · ${blockLabels[h.timeBlock]}</div>
+      <div style="color:var(--text-muted);font-size:11px">${h.points} pts</div>
     </div>`).join('')}
     <button class="tpl-apply" id="tplApplyBtn" onclick="applyTemplate('${t.id}')">Apply template</button>
   `;
@@ -1071,17 +1066,20 @@ function applyTemplate(id) {
   const btn = document.getElementById('tplApplyBtn');
   btn.disabled = true; btn.textContent = 'Setting up...';
 
-  // Create one category per template habit
-  t.habits.forEach((h, i) => {
-    cats.push({
-      id: h.name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Date.now() + '_' + i,
-      name: h.name,
-      icon: h.icon,
-      color: h.color,
-      pillar: h.pillar,
-      timeBlock: h.timeBlock,
-      items: [{ id: 'h' + Date.now() + '_' + i, name: h.name, max: 10, value: 0, points: h.points }]
-    });
+  // Create one category with all template habits as sub-items
+  const items = t.habits.map((h, i) => ({
+    id: 'h' + Date.now() + '_' + i,
+    name: h.name,
+    max: 10,
+    value: 0,
+    points: h.points
+  }));
+  cats.push({
+    id: t.id + '_' + Date.now(),
+    name: t.name,
+    icon: t.icon,
+    color: t.habits[0].color || '#f59e0b',
+    items
   });
 
   saveCategories(cats);
