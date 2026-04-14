@@ -582,8 +582,8 @@
 </div>
 
 <div class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('tracker')">Tracker</button>
-  <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab-btn active" onclick="switchTab('tracker')">Today</button>
+  <button class="tab-btn" onclick="switchTab('dashboard')">Progress</button>
 </div>
 
 <div class="tab-content active" id="tab-tracker">
@@ -614,12 +614,13 @@
     <div class="score-ring-breakdown" id="scoreBreakdown"></div>
   </div>
 </div>
+<div id="todayStatus" style="max-width:640px;margin:8px auto 0;padding:0 20px;text-align:center"></div>
 <div class="score-chips" id="scoreChips"></div>
 
 <div class="container" id="categoriesContainer"></div>
 
 <div class="container">
-  <button class="add-category-btn" onclick="openAddCategoryModal()">+ Add Category</button>
+  <button class="add-category-btn" onclick="openAddCategoryModal()">+ Add habit</button>
   <button class="tpl-skip" style="font-size:12px;padding:4px;margin-bottom:4px" onclick="openTemplatePicker(false)">Or start from a template &rarr;</button>
 </div>
 
@@ -640,6 +641,7 @@
       <div></div>
       <button class="export-pdf-btn" id="exportPdfBtn" onclick="exportWeekPDF()">⬇ Export PDF</button>
     </div>
+    <div id="dashHeadline" style="font-size:16px;font-weight:600;margin-bottom:14px;color:var(--text);line-height:1.4"></div>
     <div id="dashIntention"></div>
     <div class="dash-grid" id="dashKPIs"></div>
     <div class="chart-container">
@@ -669,17 +671,17 @@
 <div class="bottom-nav" id="bottomNav">
   <button class="bottom-nav-btn active" onclick="switchTabMobile('tracker')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
-    Tracker
+    Today
   </button>
   <button class="bottom-nav-btn" onclick="switchTabMobile('dashboard')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="4"/><rect x="14" y="10" width="7" height="7"/><rect x="3" y="13" width="7" height="4"/></svg>
-    Dashboard
+    Progress
   </button>
 </div>
 
 <div class="modal-overlay" id="addCategoryModal">
   <div class="modal">
-    <h3>Add Category</h3>
+    <h3>Add Habit</h3>
     <label>Category Name</label>
     <input id="newCatName" type="text" placeholder="e.g. Fitness">
     <label>Icon (emoji)</label>
@@ -1347,8 +1349,45 @@ function render() {
     });
   }
 
-  // Category breakdown (hidden)
   document.getElementById('scoreBreakdown').innerHTML = '';
+
+  // 7-day average context
+  let weekAvgHtml = '';
+  if (isToday(currentDate)) {
+    let daysWithData = 0, avgTotal = 0;
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const dd = getDayData(d);
+      let s = 0; cats.forEach(c => s += getCategoryScore(c, dd));
+      if (s > 0) { daysWithData++; avgTotal += s; }
+    }
+    if (daysWithData >= 3) {
+      weekAvgHtml = `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">7-day avg: ${Math.round(avgTotal / daysWithData)}</div>`;
+    }
+  }
+  document.getElementById('scoreLabel').insertAdjacentHTML('afterend', '');
+
+  // Today status
+  const statusEl = document.getElementById('todayStatus');
+  if (isToday(currentDate) && cats.length > 0) {
+    const allItems = [];
+    cats.forEach(c => c.items.forEach(i => allItems.push(i)));
+    const logged = allItems.filter(i => (dayData[i.id] || 0) > 0).length;
+    const total = allItems.length;
+    const allDone = total > 0 && allItems.every(i => (dayData[i.id] || 0) >= i.points);
+
+    if (totalScore === 0 && total > 0) {
+      statusEl.innerHTML = `<div style="padding:8px 0;font-size:13px;color:var(--text-muted)">Nothing logged yet</div>${weekAvgHtml}`;
+    } else if (allDone) {
+      statusEl.innerHTML = `<div style="padding:8px 0;font-size:13px;color:var(--green);font-weight:600">All habits logged</div>${weekAvgHtml}`;
+    } else if (logged > 0) {
+      statusEl.innerHTML = `<div style="padding:8px 0;font-size:13px;color:var(--text-sec)">${logged} of ${total} habits logged</div>${weekAvgHtml}`;
+    } else {
+      statusEl.innerHTML = weekAvgHtml;
+    }
+  } else {
+    statusEl.innerHTML = '';
+  }
 
   // Category chips (clickable filter)
   document.getElementById('scoreChips').innerHTML = catScores.map(({ cat, score, max }) => `
@@ -2031,6 +2070,28 @@ function renderDashboard() {
       }
     });
   }
+
+  // Dashboard headline
+  const headlineEl = document.getElementById('dashHeadline');
+  const dayNames7 = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let headline = '';
+  if (streak >= 7) {
+    headline = `🔥 ${streak}-day streak — you're in a rhythm`;
+  } else if (Math.round(twa * 100) > Math.round(lwa * 100) + 5) {
+    headline = `📈 Strong week — up ${Math.round((twa - lwa) * 100)} pts from last week`;
+  } else if (Math.round(twa * 100) < Math.round(lwa * 100) - 5) {
+    // Find weakest day
+    const dayAvgs = [0,0,0,0,0,0,0];
+    const dayCounts = [0,0,0,0,0,0,0];
+    tw.forEach(d => { if (d.total > 0) { dayAvgs[d.date.getDay()] += d.total; dayCounts[d.date.getDay()]++; } });
+    let weakest = { day: 0, avg: 999 };
+    dayCounts.forEach((c, i) => { if (c > 0 && dayAvgs[i]/c < weakest.avg) weakest = { day: i, avg: dayAvgs[i]/c }; });
+    headline = `📉 Dip this week — ${dayNames7[weakest.day]} is pulling you down`;
+  } else if (dd.filter(d => d.total > 0).length >= 7) {
+    const avg = Math.round(dd.slice(0, 7).reduce((s, d) => s + d.total, 0) / 7);
+    headline = `Your 7-day average is ${avg} pts`;
+  }
+  headlineEl.textContent = headline;
 
   document.getElementById('dashKPIs').innerHTML = `
     <div class="dash-card"><div class="dash-card-label">Today</div><div class="dash-card-value" style="color:${today.pct>=0.8?'var(--green)':today.pct>=0.5?'var(--amber)':'var(--primary)'}">${today.total}</div><div class="dash-card-sub">of ${today.max}</div></div>
