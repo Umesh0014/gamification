@@ -775,6 +775,28 @@
     .category .category-delete { opacity: 0.5; }
     .category-delete:hover { color: var(--red); background: var(--red-bg); border-color: #fecaca; }
 
+    .category-move {
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      opacity: 0.5;
+      transition: all 0.15s;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .category-move:hover { color: var(--accent); background: var(--accent-bg); opacity: 1; }
+    .category-move:disabled { opacity: 0.15; cursor: default; }
+    .category-move:disabled:hover { color: var(--text-muted); background: none; }
+
     .history-panel {
       display: none;
       background: var(--card);
@@ -1535,10 +1557,13 @@ function render() {
   const container = document.getElementById('categoriesContainer');
   const filteredScores = activeFilter ? catScores.filter(c => c.cat.id === activeFilter) : catScores;
 
-  container.innerHTML = filteredScores.map(({ cat, score, max }) => `
+  const totalCats = filteredScores.length;
+  container.innerHTML = filteredScores.map(({ cat, score, max }, idx) => `
     <div class="category" id="cat-${cat.id}">
       <div class="category-header" onclick="toggleCategory('${cat.id}')">
         <div class="category-header-left">
+          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',-1)" ${idx === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
+          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',1)" ${idx === totalCats - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
           <div class="category-icon" style="background:${cat.color}15;color:${cat.color}">${cat.icon}</div>
           <div class="category-title">${cat.name}</div>
         </div>
@@ -1617,6 +1642,19 @@ function addItem(catId) {
   if (!cat) return;
   const id = catId[0] + Date.now();
   cat.items.push({ id, name, max: 10, value: 0, points: pts });
+  saveCategories(cats);
+  render();
+}
+
+function moveCategory(catId, direction) {
+  const cats = getCategories();
+  const idx = cats.findIndex(c => c.id === catId);
+  if (idx === -1) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= cats.length) return;
+  const temp = cats[idx];
+  cats[idx] = cats[newIdx];
+  cats[newIdx] = temp;
   saveCategories(cats);
   render();
 }
