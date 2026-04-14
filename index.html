@@ -845,11 +845,11 @@ function render() {
   });
 
   document.getElementById('totalScore').textContent = totalScore;
-  document.getElementById('totalMax').textContent = `/ ${totalMax}`;
+  document.getElementById('totalMax').textContent = `/ 100`;
 
   const circle = document.getElementById('progressCircle');
   const circ = 2 * Math.PI * 38;
-  const pct = totalMax > 0 ? totalScore / totalMax : 0;
+  const pct = totalScore / 100;
   circle.style.strokeDashoffset = circ * (1 - pct);
   const sc = pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)';
   circle.style.stroke = sc;
@@ -930,6 +930,16 @@ function updateValue(iid, val, max) {
   saveDayData(currentDate, dd); render();
 }
 
+function getTotalMax(cats) {
+  let total = 0;
+  cats.forEach(c => c.items.forEach(i => total += i.points));
+  return total;
+}
+
+function getRemainingScore(cats, excludePoints) {
+  return 100 - getTotalMax(cats) + (excludePoints || 0);
+}
+
 function addItem(cid) {
   const n = document.getElementById('newItem-' + cid), p = document.getElementById('newPts-' + cid);
   const name = n.value.trim(), pts = parseInt(p.value);
@@ -937,16 +947,23 @@ function addItem(cid) {
   if (!pts || pts < 1) { alert('Please enter a score'); p.focus(); return; }
   const cats = getCategories(), cat = cats.find(c => c.id === cid);
   if (!cat) return;
+  const remaining = getRemainingScore(cats, 0);
+  if (remaining <= 0) { alert('Total score limit reached (100). Remove or reduce existing items to add new ones.'); return; }
+  if (pts > remaining) { alert('Score too high. Only ' + remaining + ' points remaining out of 100.'); p.focus(); return; }
   cat.items.push({ id: cid[0] + Date.now(), name, max: 10, value: 0, points: pts });
   saveCategories(cats); render();
 }
 
 function addSuggestion(catId, name) {
-  const pts = prompt('Set score for "' + name + '":', '2');
+  const cats = getCategories();
+  const remaining = getRemainingScore(cats, 0);
+  if (remaining <= 0) { alert('Total score limit reached (100). Remove or reduce existing items to add new ones.'); return; }
+  const pts = prompt('Set score for "' + name + '" (max ' + remaining + ' remaining):', Math.min(2, remaining));
   if (pts === null) return;
   const points = parseInt(pts);
   if (!points || points < 1) { alert('Please enter a valid score'); return; }
-  const cats = getCategories(), cat = cats.find(c => c.id === catId);
+  if (points > remaining) { alert('Score too high. Only ' + remaining + ' points remaining out of 100.'); return; }
+  const cat = cats.find(c => c.id === catId);
   if (!cat) return;
   cat.items.push({ id: catId[0] + Date.now(), name, max: 10, value: 0, points });
   saveCategories(cats); render();
@@ -975,10 +992,12 @@ function editItem(cid, iid) {
   const nn = prompt('Edit name:', item.name);
   if (nn === null) return;
   if (!nn.trim()) { alert('Name cannot be empty'); return; }
-  const np = prompt('Edit max score:', item.points);
+  const remaining = getRemainingScore(cats, item.points);
+  const np = prompt('Edit max score (max ' + remaining + ' remaining):', item.points);
   if (np === null) return;
   const pts = parseInt(np);
   if (!pts || pts < 1) { alert('Invalid score'); return; }
+  if (pts > remaining) { alert('Score too high. Only ' + remaining + ' points remaining out of 100.'); return; }
   item.name = nn.trim(); item.points = pts;
   saveCategories(cats); render();
 }
