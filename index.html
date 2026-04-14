@@ -197,7 +197,7 @@
     .intention-input-wrap { display: flex; gap: 8px; align-items: flex-start; }
     .intention-input { flex: 1; height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px; font-family: inherit; outline: none; color: var(--text); background: var(--bg); }
     .intention-input:focus { border-color: var(--text); }
-    .intention-save-btn { height: 36px; padding: 0 14px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .intention-save-btn { height: 36px; padding: 0 14px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; }
     .intention-save-btn:hover { opacity: 0.85; }
     .intention-counter { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right; }
     .intention-display { display: flex; align-items: center; gap: 8px; }
@@ -254,7 +254,7 @@
     .item.done .item-name { color: var(--text-muted); text-decoration: line-through; }
     .item-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .item-stepper { display: flex; align-items: center; gap: 2px; }
-    .stepper-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 16px; cursor: pointer; display: grid; place-items: center; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .stepper-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--card2); color: var(--text); font-size: 16px; cursor: pointer; display: grid; place-items: center; user-select: none; -webkit-tap-highlight-color: transparent; }
     .stepper-btn:active { background: var(--card); }
     .stepper-val { width: 28px; text-align: center; font-size: 14px; font-weight: 600; }
     .item-max { font-size: 11px; color: var(--text-muted); }
@@ -263,28 +263,28 @@
     .item-delete:hover { color: var(--red); opacity: 1 !important; }
 
     .add-item-row { display: flex; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border-light); margin-top: 2px; }
-    .add-item-row input { height: 32px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 0 10px; font-size: 13px; outline: none; font-family: inherit; }
+    .add-item-row input { height: 32px; background: var(--card2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 0 10px; font-size: 13px; outline: none; font-family: inherit; }
     .add-item-row input:first-child { flex: 1; }
     .add-item-row input:focus { border-color: var(--text); }
     .add-item-row input[type="number"] { width: 46px; text-align: center; }
-    .add-item-row button { height: 32px; padding: 0 14px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+    .add-item-row button { height: 32px; padding: 0 14px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
     .add-item-row button:hover { background: var(--primary-light); }
 
     .suggestions-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 0; border-top: 1px solid var(--border-light); margin-top: 2px; }
     .suggestions-label { width: 100%; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
     .suggestion-chip { padding: 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .suggestion-chip:hover { background: var(--text); color: #fff; border-color: var(--text); }
+    .suggestion-chip:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
-    .ai-suggest-btn { display: flex; align-items: center; gap: 4px; padding: 4px 12px; background: var(--text); border: none; border-radius: 6px; font-size: 11px; font-weight: 500; color: #fff; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+    .ai-suggest-btn { display: flex; align-items: center; gap: 4px; padding: 4px 12px; background: var(--primary); border: none; border-radius: 6px; font-size: 11px; font-weight: 600; color: #000; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
     .ai-suggest-btn:hover { opacity: 0.8; }
     .ai-suggest-btn:disabled { opacity: 0.3; cursor: wait; }
     .ai-suggest-btn svg { width: 11px; height: 11px; }
     .ai-suggestions { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0; }
     .ai-chip { padding: 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .ai-chip:hover { background: var(--text); color: #fff; border-color: var(--text); }
+    .ai-chip:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
     .add-category-btn { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 10px; background: none; border: 1px dashed var(--border); border-radius: var(--r); color: var(--text-muted); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; margin-bottom: 6px; }
-    .add-category-btn:hover { border-color: var(--text); color: var(--text); }
+    .add-category-btn:hover { border-color: var(--primary); color: var(--primary); }
 
     .history-toggle { display: flex; align-items: center; justify-content: center; padding: 8px; width: 100%; background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; font-family: inherit; margin-bottom: 6px; }
     .history-toggle:hover { color: var(--text); }
@@ -485,7 +485,7 @@
       }
       .stepper-btn {
         width: 36px; height: 36px; border: 1px solid var(--border);
-        border-radius: 8px; background: var(--bg); color: var(--text);
+        border-radius: 8px; background: var(--card2); color: var(--text);
         font-size: 18px; font-weight: 500; cursor: pointer;
         display: grid; place-items: center; user-select: none;
         -webkit-tap-highlight-color: transparent;
