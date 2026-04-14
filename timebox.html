@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -102,6 +103,20 @@
     .chip-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-muted); margin-bottom: 1px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chip-score { font-size: 14px; font-weight: 600; color: var(--text); }
     .chip-max { font-size: 10px; color: var(--text-muted); }
+
+    /* Export PDF */
+    .export-pdf-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 500; color: var(--text-sec); cursor: pointer; font-family: inherit; }
+    .export-pdf-btn:hover { border-color: var(--text); color: var(--text); }
+    .export-pdf-btn:disabled { opacity: 0.4; cursor: wait; }
+    .pdf-offscreen { position: fixed; left: -9999px; top: 0; width: 794px; }
+
+    @media print {
+      .header, .tab-nav, .bottom-nav, .toast-container, .modal-overlay, .add-category-btn, .history-toggle, .export-pdf-btn, .heatmap-toggle, .heatmap-filters, .ai-suggest-btn, .suggestions-row, .add-item-row, .category-move, .category-delete, .item-delete, .stepper-btn, button { display: none !important; }
+      .score-ring-fill { transition: none !important; }
+      body { padding: 0; background: #fff; }
+      .app-content { display: block !important; }
+      .tab-content { display: block !important; }
+    }
 
     /* Weekly Intention */
     .intention-banner { max-width: 640px; margin: 12px auto 0; padding: 0 20px; }
@@ -545,6 +560,10 @@
 
 <div class="tab-content" id="tab-dashboard">
   <div class="container" style="margin-top:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div></div>
+      <button class="export-pdf-btn" id="exportPdfBtn" onclick="exportWeekPDF()">⬇ Export PDF</button>
+    </div>
     <div id="dashIntention"></div>
     <div class="dash-grid" id="dashKPIs"></div>
     <div id="personalBests"></div>
@@ -2107,6 +2126,145 @@ function showHeatmapTip(e, el) {
 document.getElementById('addCategoryModal').addEventListener('click', function(e) { if (e.target === this) closeModal('addCategoryModal'); });
 document.getElementById('milestoneModal').addEventListener('click', function(e) { if (e.target === this) closeModal('milestoneModal'); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('addCategoryModal'); closeModal('milestoneModal'); } });
+
+// ===== WEEKLY PDF EXPORT =====
+function getHeatColor(pct) {
+  if (pct >= 85) return '#4ade80';
+  if (pct >= 70) return '#60a5fa';
+  if (pct >= 41) return '#fcd34d';
+  if (pct > 0) return '#fca5a5';
+  return '#e5e7eb';
+}
+
+async function exportWeekPDF() {
+  const btn = document.getElementById('exportPdfBtn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+
+  const cats = getCategories();
+  const weekStart = getWeekStart(new Date());
+  const wsDate = new Date(weekStart + 'T00:00:00');
+  const days = [];
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(wsDate); d.setDate(d.getDate() + i);
+    const dd = getDayData(d);
+    let total = 0;
+    const catData = {};
+    const pillarTotals = { Health: 0, Wealth: 0, Soul: 0 };
+    const pillarMax = { Health: 0, Wealth: 0, Soul: 0 };
+    cats.forEach(c => {
+      const s = getCategoryScore(c, dd);
+      const m = getCategoryMax(c);
+      total += s;
+      catData[c.id] = s;
+      if (c.pillar) { pillarTotals[c.pillar] += s; pillarMax[c.pillar] += m; }
+    });
+    const hasData = Object.keys(dd).length > 0 || total > 0;
+    days.push({ date: d, total, hasData, catData, pillarTotals, pillarMax });
+  }
+
+  const weekEnd = new Date(wsDate); weekEnd.setDate(weekEnd.getDate() + 6);
+  const intention = getIntention(weekStart) || '';
+  const weekTotal = days.reduce((s, d) => s + d.total, 0);
+  const weekMax = cats.reduce((s, c) => s + getCategoryMax(c), 0) * 7;
+  const weekAvg = (weekTotal / 7).toFixed(1);
+  const bestDay = days.reduce((best, d, i) => d.total > best.total ? { total: d.total, name: dayNames[i] } : best, { total: 0, name: '' });
+
+  // Streak
+  const scores = getAllDayScores(90);
+  const streak = computeStreak(scores);
+
+  const maxDay = Math.max(...days.map(d => d.total), 1);
+
+  // Build HTML
+  const ef = (s) => `<span style="font-family:Apple Color Emoji,Segoe UI Emoji,sans-serif">${s}</span>`;
+
+  let catRows = cats.map(c => {
+    const cells = days.map(d => `<td style="text-align:center;padding:6px 4px;font-size:12px;color:${d.hasData ? '#333' : '#bbb'}">${d.hasData ? d.catData[c.id] : '—'}</td>`).join('');
+    const avg = (days.reduce((s, d) => s + (d.catData[c.id] || 0), 0) / 7).toFixed(1);
+    return `<tr><td style="padding:6px 8px;font-size:12px;white-space:nowrap">${ef(c.icon)} ${c.name}</td>${cells}<td style="text-align:center;padding:6px 4px;font-size:12px;font-weight:600">${avg}</td></tr>`;
+  }).join('');
+
+  // Pillar rows
+  const hasPillars = cats.some(c => c.pillar);
+  let pillarRows = '';
+  if (hasPillars) {
+    const pColors = { Health: '#22c55e', Wealth: '#eab308', Soul: '#a78bfa' };
+    ['Health', 'Wealth', 'Soul'].forEach(p => {
+      const pMax = cats.filter(c => c.pillar === p).reduce((s, c) => s + getCategoryMax(c), 0);
+      if (pMax === 0) return;
+      const cells = days.map(d => `<td style="text-align:center;padding:6px 4px;font-size:12px;font-weight:600;color:${pColors[p]}">${d.pillarTotals[p]}</td>`).join('');
+      const avg = (days.reduce((s, d) => s + d.pillarTotals[p], 0) / 7).toFixed(1);
+      pillarRows += `<tr style="background:#fafafa"><td style="padding:6px 8px;font-size:12px;font-weight:600;color:${pColors[p]}">${p}</td>${cells}<td style="text-align:center;padding:6px 4px;font-size:12px;font-weight:700">${avg}</td></tr>`;
+    });
+  }
+
+  const barHtml = days.map((d, i) => {
+    const h = Math.max(4, (d.total / maxDay) * 60);
+    const c = getHeatColor(d.hasData ? Math.round((d.total / (cats.reduce((s, c) => s + getCategoryMax(c), 0) || 1)) * 100) : 0);
+    return `<div style="flex:1;text-align:center">
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px;color:${d.hasData ? '#333' : '#ccc'}">${d.hasData ? d.total : '—'}</div>
+      <div style="height:60px;display:flex;align-items:flex-end;justify-content:center"><div style="width:28px;height:${h}px;background:${c};border-radius:4px 4px 1px 1px"></div></div>
+      <div style="font-size:11px;color:#888;margin-top:4px">${dayNames[i]}</div>
+    </div>`;
+  }).join('');
+
+  const html = `<div style="font-family:-apple-system,Helvetica Neue,sans-serif;color:#111;padding:24px;max-width:794px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:4px">LevelUp Habits</div>
+      <div style="font-size:20px;font-weight:700">Weekly Review</div>
+      <div style="font-size:13px;color:#666;margin-top:4px">${months[wsDate.getMonth()]} ${wsDate.getDate()} – ${months[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}</div>
+      ${intention ? `<div style="margin-top:12px;font-size:14px;font-style:italic;color:#555">${ef('🎯')} "${intention}"</div>` : ''}
+    </div>
+
+    <div style="display:flex;gap:4px;margin-bottom:20px">${barHtml}</div>
+
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;font-weight:600">Habit Scorecard</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <thead><tr style="border-bottom:2px solid #eee">
+        <th style="text-align:left;padding:6px 8px;font-size:11px;color:#888;font-weight:500">Category</th>
+        ${dayNames.map(d => `<th style="text-align:center;padding:6px 4px;font-size:11px;color:#888;font-weight:500">${d}</th>`).join('')}
+        <th style="text-align:center;padding:6px 4px;font-size:11px;color:#888;font-weight:500">Avg</th>
+      </tr></thead>
+      <tbody>${catRows}${pillarRows ? `<tr><td colspan="9" style="padding:0;border-bottom:1px solid #eee"></td></tr>${pillarRows}` : ''}</tbody>
+    </table>
+
+    <div style="background:#fafafa;border-radius:8px;padding:16px;margin-bottom:20px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;font-weight:600">Weekly Summary</div>
+      <div style="font-size:14px;margin-bottom:4px"><b>Total:</b> ${weekTotal} / ${weekMax} · <b>Avg:</b> ${weekAvg}</div>
+      <div style="font-size:14px;margin-bottom:4px"><b>Best day:</b> ${bestDay.name} (${bestDay.total})</div>
+      <div style="font-size:14px"><b>Streak:</b> ${streak} days</div>
+    </div>
+
+    <div style="margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;font-weight:600">Notes for Next Week</div>
+    ${[1,2,3,4].map(() => '<div style="border-bottom:1px solid #ddd;height:28px;margin-bottom:4px"></div>').join('')}
+  </div>`;
+
+  // Render offscreen
+  const container = document.createElement('div');
+  container.className = 'pdf-offscreen';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+
+  try {
+    const filename = `timebox-week-${months[wsDate.getMonth()].toLowerCase()}${wsDate.getDate()}-${wsDate.getFullYear()}.pdf`;
+    await html2pdf().set({
+      margin: 10,
+      filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(container).save();
+  } catch (e) {
+    alert('PDF generation failed: ' + e.message);
+  }
+
+  container.remove();
+  btn.disabled = false; btn.textContent = '⬇ Export PDF';
+}
+
 render();
 </script>
 </body>
