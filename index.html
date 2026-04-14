@@ -366,6 +366,23 @@
     }
     .add-item-row button:hover { background: var(--primary-light); }
 
+    .suggestions-row {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      padding: 8px 0; border-top: 1px solid var(--border-light); margin-top: 2px;
+    }
+    .suggestions-label {
+      width: 100%; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 2px;
+    }
+    .suggestion-chip {
+      padding: 4px 10px; background: var(--primary-bg);
+      border: 1px solid var(--primary-border); border-radius: 20px;
+      font-size: 11px; font-weight: 500; color: var(--primary);
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .suggestion-chip:hover { background: var(--primary); color: #fff; }
+
     /* ===== ADD CATEGORY ===== */
     .add-category-btn {
       display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -681,6 +698,32 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
+const SUGGESTIONS = {
+  health: ['Wake up early', 'Exercise (30 min)', 'Drink 3L water', 'Eat breakfast', 'Take vitamins', 'Stretch (10 min)', '10,000 steps', 'No junk food', 'Brush teeth AM+PM', 'Skincare routine', 'Posture breaks', 'Eye breaks 20-20-20'],
+  fitness: ['Workout (30 min)', 'Cardio (20 min)', 'Stretching', '10,000 steps', 'Protein intake', 'Track calories', 'No sugar', 'Drink 3L water', 'Sleep 7+ hours', 'Warm up before exercise'],
+  sleep: ['Bedtime before 11 PM', 'Sleep 7+ hours', 'No screen 30 min before bed', 'Wake time consistent', 'No caffeine after 3 PM', 'Dark room', 'Read before bed'],
+  nutrition: ['Drink 3L water', 'Eat breakfast before 9:30', 'Balanced lunch', 'Dinner before 8:30', 'Protein each meal', 'No junk snacking', 'Eat fruits/vegetables', 'Track calories', 'Take supplements'],
+  study: ['Study (2 hrs)', 'Revise notes', 'Practice problems', 'Read textbook (30 min)', 'Watch lecture', 'Make flashcards', 'Quiz yourself', 'No phone while studying'],
+  learning: ['Read (20 min)', 'Online course (30 min)', 'Skill practice (15 min)', 'Watch educational content', 'Take notes', 'Industry news (10 min)', 'Practice coding'],
+  work: ['Deep work (4 hrs)', 'Clear inbox', 'Update task list', 'Team check-in', 'No social media during work', 'Plan tomorrow', 'Review goals', 'Client follow-up'],
+  productivity: ['Plan the day', 'Top 3 priorities done', 'No social media (2 hrs)', 'Deep focus session', 'Clear inbox', 'Review weekly goals', 'Time blocking', 'Batch similar tasks'],
+  mental: ['Meditation (10 min)', 'Gratitude journal', 'Deep breathing', 'No-screen break (15 min)', 'Evening reflection', 'Digital sunset 10 PM', 'Affirmations', 'Walk in nature'],
+  spiritual: ['Meditation (10 min)', 'Prayer', 'Gratitude journal', 'Read spiritual text', 'Acts of kindness', 'Self-reflection', 'Mindfulness practice'],
+  finance: ['Track expenses', 'No unnecessary spending', 'Review budget', 'Save/invest', 'Read about investing (15 min)', 'Check bank balance', 'Pay bills on time'],
+  relationship: ['Quality time with partner', 'Call a friend/family', 'Express gratitude', 'Active listening', 'Plan a date', 'Send a kind message', 'Family check-in'],
+  selfcare: ['Skincare routine', 'Grooming', 'Dress well', 'Hobby time (30 min)', 'Social media detox', 'Say no to one thing', 'Do something fun'],
+  reading: ['Read (30 min)', 'Take notes on book', 'Discuss what you read', 'Add to reading list', 'Review highlights'],
+  hygiene: ['Brush teeth AM+PM', 'Floss/interdental', 'Shower', 'Clean nails', 'Skincare', 'Laundry', 'Clean workspace'],
+};
+
+function getSuggestions(categoryName) {
+  const name = categoryName.toLowerCase().trim();
+  for (const key in SUGGESTIONS) {
+    if (name.includes(key) || key.includes(name)) return SUGGESTIONS[key];
+  }
+  return null;
+}
+
 const DEFAULT_CATEGORIES = [];
 let currentDate = new Date();
 let activeFilter = null;
@@ -785,6 +828,16 @@ function render() {
               </div>
             </div>`;
         }).join('')}
+        ${(() => {
+          const sugs = getSuggestions(cat.name);
+          const existing = cat.items.map(i => i.name.toLowerCase());
+          const filtered = sugs ? sugs.filter(s => !existing.includes(s.toLowerCase())) : [];
+          if (filtered.length === 0) return '';
+          return `<div class="suggestions-row">
+            <div class="suggestions-label">Suggested items</div>
+            ${filtered.map(s => `<button class="suggestion-chip" onclick="addSuggestion('${cat.id}','${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
+          </div>`;
+        })()}
         <div class="add-item-row">
           <input type="text" placeholder="Add new item..." id="newItem-${cat.id}">
           <input type="number" placeholder="Score" min="1" max="20" value="" id="newPts-${cat.id}">
@@ -817,6 +870,17 @@ function addItem(cid) {
   const cats = getCategories(), cat = cats.find(c => c.id === cid);
   if (!cat) return;
   cat.items.push({ id: cid[0] + Date.now(), name, max: 10, value: 0, points: pts });
+  saveCategories(cats); render();
+}
+
+function addSuggestion(catId, name) {
+  const pts = prompt('Set score for "' + name + '":', '2');
+  if (pts === null) return;
+  const points = parseInt(pts);
+  if (!points || points < 1) { alert('Please enter a valid score'); return; }
+  const cats = getCategories(), cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  cat.items.push({ id: catId[0] + Date.now(), name, max: 10, value: 0, points });
   saveCategories(cats); render();
 }
 
