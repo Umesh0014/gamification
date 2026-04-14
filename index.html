@@ -701,20 +701,6 @@
     <input id="newCatName" type="text" placeholder="e.g. Fitness">
     <label>Icon (emoji)</label>
     <input id="newCatIcon" type="text" placeholder="e.g. 💪" maxlength="2">
-    <label>Time Block</label>
-    <select id="newCatTimeBlock" style="width:100%;height:36px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
-      <option value="">Anytime</option>
-      <option value="morning">Morning 🌅</option>
-      <option value="afternoon">Afternoon ☀️</option>
-      <option value="evening">Evening 🌙</option>
-    </select>
-    <label>Pillar (optional)</label>
-    <select id="newCatPillar" style="width:100%;height:36px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
-      <option value="">None</option>
-      <option value="Health">Health</option>
-      <option value="Wealth">Wealth</option>
-      <option value="Soul">Soul</option>
-    </select>
     <label>Color</label>
     <input id="newCatColor" type="color" value="#2563eb" style="height:40px;padding:4px;cursor:pointer;">
     <div class="modal-actions">
@@ -1693,16 +1679,12 @@ function addCategory() {
   const name = document.getElementById('newCatName').value.trim();
   const icon = document.getElementById('newCatIcon').value.trim() || '📌';
   const color = document.getElementById('newCatColor').value;
-  const pillar = document.getElementById('newCatPillar').value || null;
-  const timeBlock = document.getElementById('newCatTimeBlock').value || null;
   if (!name) return;
   const cats = getCategories();
-  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, pillar, timeBlock, items: [] });
+  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, items: [] });
   saveCategories(cats); closeModal('addCategoryModal');
   document.getElementById('newCatName').value = '';
   document.getElementById('newCatIcon').value = '';
-  document.getElementById('newCatPillar').value = '';
-  document.getElementById('newCatTimeBlock').value = '';
   render();
 }
 
@@ -1712,19 +1694,7 @@ function editCategory(catId) {
   const nn = prompt('Edit category name:', cat.name);
   if (nn === null) return;
   if (!nn.trim()) { alert('Name cannot be empty'); return; }
-  const pillars = ['Health', 'Wealth', 'Soul'];
-  const currentPillar = cat.pillar || 'None';
-  const np = prompt('Set pillar (Health / Wealth / Soul / None):', currentPillar);
-  if (np === null) return;
-  const pv = np.trim();
-  const blocks = ['morning', 'afternoon', 'evening'];
-  const currentBlock = cat.timeBlock || 'anytime';
-  const nb = prompt('Set time block (morning / afternoon / evening / anytime):', currentBlock);
-  if (nb === null) return;
-  const bv = nb.trim().toLowerCase();
   cat.name = nn.trim();
-  cat.pillar = pillars.includes(pv) ? pv : null;
-  cat.timeBlock = blocks.includes(bv) ? bv : null;
   saveCategories(cats); render();
 }
 
