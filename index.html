@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LevelUp Habits</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -12,1244 +12,504 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #fafbfc;
+      --bg: #f0f4f8;
       --card: #ffffff;
-      --card-hover: #fafbfc;
-      --border: #eaecf0;
-      --border-light: #f2f4f7;
-      --text: #101828;
-      --text-secondary: #344054;
-      --text-muted: #98a2b3;
-      --accent: #7c3aed;
-      --accent-light: #8b5cf6;
-      --accent-bg: #f5f3ff;
-      --accent-border: #e9d5ff;
+      --border: #e3e8ef;
+      --border-light: #f0f3f7;
+      --text: #0d1b2a;
+      --text-sec: #3d5a80;
+      --text-muted: #8e99a4;
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-bg: #eff6ff;
+      --primary-border: #bfdbfe;
       --green: #059669;
       --green-bg: #ecfdf5;
-      --green-border: #a7f3d0;
       --amber: #d97706;
       --amber-bg: #fffbeb;
       --red: #dc2626;
       --red-bg: #fef2f2;
-      --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
-      --shadow-md: 0 4px 12px rgba(16,24,40,0.08);
-      --shadow-lg: 0 12px 40px rgba(16,24,40,0.12);
-      --radius: 12px;
-      --radius-lg: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: 'DM Sans', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: 80px;
+      padding-bottom: 60px;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ========== HEADER ========== */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-inner {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-logo {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--accent), #a78bfa);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .date-nav {
-      display: flex;
-      align-items: center;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .date-nav button {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: all 0.15s;
-    }
-
-    .date-nav button:hover { background: var(--bg); color: var(--accent); }
-
-    .date-display {
-      font-size: 13px;
-      font-weight: 600;
-      padding: 0 8px;
-      color: var(--text-secondary);
-      min-width: 120px;
-      text-align: center;
-      border-left: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-    }
-
-    .date-display .today-label {
-      color: var(--accent);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 700;
-    }
-
-    /* ========== USER PROFILE ========== */
-    .user-profile { position: relative; }
-
-    .user-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid var(--border);
-      transition: border-color 0.15s;
-    }
-
-    .user-avatar:hover { border-color: var(--accent); }
-
-    .user-menu {
-      display: none;
-      position: absolute;
-      top: 44px;
-      right: 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 6px;
-      min-width: 220px;
-      box-shadow: var(--shadow-lg);
-      z-index: 300;
-    }
-
-    .user-menu.open { display: block; }
-
-    .user-menu-info {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border-light);
-      margin-bottom: 4px;
-    }
-
-    .user-menu-name { font-size: 13px; font-weight: 600; color: var(--text); }
-    .user-menu-email { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-    .user-menu button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      padding: 8px 12px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      color: var(--red);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .user-menu button:hover { background: var(--red-bg); }
-
-    /* ========== LOGIN SCREEN ========== */
+    /* ===== LOGIN ===== */
     .login-screen {
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
-      background: linear-gradient(135deg, #f5f3ff 0%, #fafbfc 50%, #ecfdf5 100%);
+      background: linear-gradient(160deg, #eff6ff 0%, #f0f4f8 40%, #ecfdf5 100%);
     }
 
     .login-card {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 56px 44px;
+      border-radius: 24px;
+      padding: 52px 44px;
       text-align: center;
-      max-width: 420px;
-      width: 100%;
+      max-width: 400px;
+      width: 90%;
       box-shadow: var(--shadow-lg);
     }
 
     .login-logo {
-      width: 56px;
-      height: 56px;
-      background: linear-gradient(135deg, var(--accent), #a78bfa);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 22px;
-      margin: 0 auto 20px;
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 16px;
+      display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 24px;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.3);
     }
 
-    .login-card h1 {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-
-    .login-card p {
-      color: var(--text-muted);
-      font-size: 15px;
-      margin-bottom: 36px;
-      line-height: 1.5;
-    }
+    .login-card h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+    .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
 
     .google-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 32px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 28px;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; font-size: 14px; font-weight: 600;
+      color: var(--text); cursor: pointer;
+      font-family: inherit; box-shadow: var(--shadow);
       transition: all 0.2s;
-      box-shadow: var(--shadow-sm);
-      font-family: inherit;
     }
-
-    .google-btn:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--accent-border);
-      transform: translateY(-1px);
-    }
-
+    .google-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
     .google-btn svg { width: 18px; height: 18px; }
 
     .app-content { display: none; }
 
-    /* ========== SCORE SUMMARY ========== */
-    .score-bar {
-      max-width: 860px;
-      margin: 24px auto 0;
-      padding: 0 24px;
+    /* ===== HEADER ===== */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
     }
 
-    .score-bar-inner {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      box-shadow: var(--shadow-sm);
+    .header-inner {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
     }
 
-    .total-score { text-align: center; min-width: 100px; }
+    .header-brand { display: flex; align-items: center; gap: 10px; }
 
-    .total-score .number {
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      line-height: 1;
+    .header-logo {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 10px; display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 14px;
     }
 
-    .total-score .max {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      font-weight: 500;
+    .header h1 { font-size: 17px; font-weight: 700; }
+
+    .header-right { display: flex; align-items: center; gap: 6px; }
+
+    .date-nav {
+      display: flex; align-items: center;
+      background: var(--bg); border-radius: 10px; overflow: hidden;
     }
 
-    .progress-ring { position: relative; width: 96px; height: 96px; }
-    .progress-ring svg { transform: rotate(-90deg); }
+    .date-nav button {
+      background: none; border: none;
+      color: var(--text-sec); width: 34px; height: 34px;
+      cursor: pointer; font-size: 15px;
+      display: grid; place-items: center;
+      transition: color 0.15s;
+    }
+    .date-nav button:hover { color: var(--primary); }
 
-    .progress-ring .progress-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .date-display {
+      font-size: 12px; font-weight: 600;
+      padding: 0 6px; color: var(--text-sec);
+      min-width: 100px; text-align: center;
     }
 
-    .score-breakdown {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 6px;
+    .today-label {
+      color: var(--primary); font-size: 9px;
+      text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
     }
 
-    .score-chip {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 10px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1.5px solid transparent;
+    /* ===== USER ===== */
+    .user-profile { position: relative; }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      cursor: pointer; border: 2px solid var(--border);
     }
+    .user-avatar:hover { border-color: var(--primary); }
 
-    .score-chip:hover { background: var(--accent-bg); border-color: var(--accent-border); }
-
-    .score-chip.active {
-      border-color: var(--accent);
-      background: var(--accent-bg);
-      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    .user-menu {
+      display: none; position: absolute; top: 42px; right: 0;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 14px; padding: 6px; min-width: 200px;
+      box-shadow: var(--shadow-lg); z-index: 300;
     }
+    .user-menu.open { display: block; }
 
-    .score-chip .chip-name {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 600;
+    .user-menu-info { padding: 10px 12px; border-bottom: 1px solid var(--border-light); margin-bottom: 4px; }
+    .user-menu-name { font-size: 13px; font-weight: 600; }
+    .user-menu-email { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .user-menu button {
+      width: 100%; padding: 8px 12px; background: none; border: none;
+      border-radius: 8px; color: var(--red); font-size: 13px;
+      font-weight: 500; cursor: pointer; text-align: left; font-family: inherit;
     }
+    .user-menu button:hover { background: var(--red-bg); }
 
-    .score-chip .chip-score { font-size: 17px; font-weight: 700; color: var(--accent); }
-    .score-chip .chip-max { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-
-    /* ========== CATEGORIES ========== */
-    .container {
-      max-width: 860px;
-      margin: 16px auto 0;
-      padding: 0 24px;
-    }
-
-    .category {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      margin-bottom: 12px;
-      overflow: hidden;
-      transition: all 0.2s;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .category:hover { box-shadow: var(--shadow-md); border-color: #d0d5dd; }
-
-    .category-header {
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .category-header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .category-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .category-title { font-size: 14px; font-weight: 600; color: var(--text); }
-
-    .category-score-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .category-score {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent);
-      background: var(--accent-bg);
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .category-toggle {
-      color: var(--text-muted);
-      font-size: 12px;
-      transition: transform 0.2s;
-    }
-
-    .category.collapsed .category-toggle { transform: rotate(-90deg); }
-
-    .category-body { padding: 0 20px 16px; }
-    .category.collapsed .category-body { display: none; }
-
-    /* ========== ITEMS ========== */
-    .item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border-light);
-      gap: 12px;
-    }
-
-    .item:last-of-type { border-bottom: none; }
-
-    .item-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .item-check {
-      width: 22px;
-      height: 22px;
-      border: 2px solid #d0d5dd;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-
-    .item-check:hover { border-color: var(--accent); }
-
-    .item-check.checked {
-      background: var(--green);
-      border-color: var(--green);
-      animation: checkPop 0.3s ease;
-    }
-
-    @keyframes checkPop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    .item-check.checked::after {
-      content: '\2713';
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .item-name {
-      font-size: 13px;
-      color: var(--text-secondary);
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 500;
-    }
-
-    .item.done .item-name {
-      color: var(--text-muted);
-      text-decoration: line-through;
-    }
-
-    .item-right {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .item-input {
-      width: 48px;
-      height: 32px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      outline: none;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-
-    .item-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
-
-    .item-max { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-
-    .item-delete {
-      width: 26px;
-      height: 26px;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      opacity: 0;
-      transition: all 0.15s;
-    }
-
-    .item:hover .item-delete { opacity: 1; }
-    .item-delete:hover { color: var(--red); background: var(--red-bg); }
-
-    /* ========== ADD ITEM ========== */
-    .add-item-row {
-      display: flex;
-      gap: 8px;
-      padding-top: 12px;
-      margin-top: 4px;
-      border-top: 1px solid var(--border-light);
-    }
-
-    .add-item-row input {
-      height: 36px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 13px;
-      outline: none;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-
-    .add-item-row input:first-child { flex: 1; }
-    .add-item-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
-    .add-item-row input[type="number"] { width: 56px; text-align: center; }
-
-    .add-item-row button {
-      height: 36px;
-      padding: 0 16px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-
-    .add-item-row button:hover { background: var(--accent-light); transform: translateY(-1px); }
-
-    /* ========== ADD CATEGORY ========== */
-    .add-category-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px;
-      background: var(--card);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius-lg);
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 12px;
-      font-family: inherit;
-    }
-
-    .add-category-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-bg);
-    }
-
-    /* ========== HISTORY ========== */
-    .history-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      margin-bottom: 12px;
-      width: 100%;
-      font-family: inherit;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .history-toggle:hover { color: var(--accent); border-color: var(--accent-border); }
-
-    /* Export & Data Table */
-    .export-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .export-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: inherit;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .export-btn:hover { color: var(--accent); border-color: var(--accent-border); }
-    .export-btn svg { width: 16px; height: 16px; }
-
-    .data-table-panel {
-      display: none;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-    }
-
-    .data-table-panel.open { display: block; }
-
-    .data-table-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .data-table-header h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    .data-table-header select {
-      height: 32px;
-      padding: 0 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-family: inherit;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .data-table-wrap {
-      overflow-x: auto;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .data-table th {
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 700;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 10px;
-      border-bottom: 2px solid var(--border);
-      white-space: nowrap;
-    }
-
-    .data-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border-light);
-      color: var(--text-secondary);
-      white-space: nowrap;
-      font-weight: 500;
-    }
-
-    .data-table tr:hover td { background: var(--bg); }
-
-    .data-table .score-cell {
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .data-table .score-full { color: var(--green); background: var(--green-bg); border-radius: 4px; }
-    .data-table .score-partial { color: var(--amber); }
-    .data-table .score-zero { color: var(--text-muted); }
-
-    .category-delete {
-      width: 30px;
-      height: 30px;
-      background: none;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      opacity: 0;
-      transition: all 0.15s;
-      margin-left: 4px;
-    }
-
-    .category .category-delete { opacity: 0.5; }
-    .category-delete:hover { color: var(--red); background: var(--red-bg); border-color: #fecaca; }
-
-    .category-move {
-      width: 28px;
-      height: 28px;
-      background: none;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      opacity: 0.5;
-      transition: all 0.15s;
-      padding: 0;
-      line-height: 1;
-    }
-
-    .category-move:hover { color: var(--accent); background: var(--accent-bg); opacity: 1; }
-    .category-move:disabled { opacity: 0.15; cursor: default; }
-    .category-move:disabled:hover { color: var(--text-muted); background: none; }
-
-    .history-panel {
-      display: none;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .history-panel.open { display: block; }
-
-    .history-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border-light);
-      font-size: 13px;
-    }
-
-    .history-row:last-child { border-bottom: none; }
-    .history-date { color: var(--text-muted); font-weight: 500; }
-    .history-score { font-weight: 700; }
-
-    .streak-bar { display: flex; gap: 4px; margin-top: 12px; flex-wrap: wrap; }
-
-    .streak-day {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      background: var(--border-light);
-    }
-
-    .streak-day.low { background: #e9d5ff; }
-    .streak-day.mid { background: #c084fc; }
-    .streak-day.high { background: #a855f7; }
-    .streak-day.full { background: var(--accent); }
-
-    /* ========== MODAL ========== */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(16,24,40,0.4);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
-
-    .modal label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      margin-top: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .modal input, .modal select {
-      width: 100%;
-      height: 40px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 0 14px;
-      font-size: 14px;
-      outline: none;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-
-    .modal input:focus, .modal select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 24px;
-      justify-content: flex-end;
-    }
-
-    .modal-actions button {
-      padding: 9px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
-      font-family: inherit;
-    }
-
-    .btn-cancel { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
-    .btn-confirm { background: var(--accent); color: #fff; }
-    .btn-cancel:hover { background: var(--border-light); }
-    .btn-confirm:hover { background: var(--accent-light); transform: translateY(-1px); }
-
-    /* ========== BANNER ========== */
-    .banner {
-      width: 100%;
-      height: 80px;
-      overflow: hidden;
-    }
-
-    /* ========== TAB NAV ========== */
+    /* ===== TABS ===== */
     .tab-nav {
-      max-width: 860px;
-      margin: 16px auto 0;
-      padding: 0 24px;
-      display: flex;
-      gap: 4px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 4px;
-      box-shadow: var(--shadow-sm);
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
+      max-width: 280px; margin: 16px auto 0;
+      display: flex; gap: 4px;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; padding: 3px;
+      box-shadow: var(--shadow);
     }
 
     .tab-btn {
-      flex: 1;
-      padding: 8px 16px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: inherit;
+      flex: 1; padding: 7px 14px;
+      background: none; border: none; border-radius: 9px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      font-family: inherit; transition: all 0.15s;
     }
-
-    .tab-btn.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .tab-btn:not(.active):hover { color: var(--text); background: var(--bg); }
+    .tab-btn.active { background: var(--primary); color: #fff; }
+    .tab-btn:not(.active):hover { color: var(--text); }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* ========== DASHBOARD ========== */
-    .dash-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+    /* ===== SCORE BAR ===== */
+    .score-bar { max-width: 840px; margin: 20px auto 0; padding: 0 20px; }
+
+    .score-bar-inner {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 18px; padding: 22px;
+      display: flex; align-items: center; gap: 24px;
+      box-shadow: var(--shadow);
     }
+
+    .total-score { text-align: center; min-width: 90px; }
+    .total-score .number { font-size: 38px; font-weight: 800; line-height: 1; }
+    .total-score .max { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+    .progress-ring { position: relative; width: 90px; height: 90px; }
+    .progress-ring svg { transform: rotate(-90deg); }
+    .progress-ring .progress-text {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+
+    .score-breakdown {
+      flex: 1;
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+
+    .score-chip {
+      background: var(--bg); border-radius: 10px;
+      padding: 8px 12px; text-align: center;
+      cursor: pointer; transition: all 0.15s;
+      border: 1.5px solid transparent;
+      min-width: 80px; flex: 1;
+    }
+    .score-chip:hover { border-color: var(--primary-border); background: var(--primary-bg); }
+    .score-chip.active { border-color: var(--primary); background: var(--primary-bg); }
+
+    .chip-name {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-muted); margin-bottom: 3px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .chip-score { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .chip-max { font-size: 10px; color: var(--text-muted); }
+
+    /* ===== CATEGORIES ===== */
+    .container { max-width: 840px; margin: 14px auto 0; padding: 0 20px; }
+
+    .category {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .category:hover { box-shadow: var(--shadow-md); }
+
+    .category-header {
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+
+    .category-header-left { display: flex; align-items: center; gap: 8px; }
+
+    .category-move {
+      width: 24px; height: 24px; background: none; border: none;
+      border-radius: 6px; color: var(--text-muted);
+      cursor: pointer; display: grid; place-items: center;
+      font-size: 11px; opacity: 0.4; transition: all 0.15s;
+    }
+    .category-move:hover { color: var(--primary); background: var(--primary-bg); opacity: 1; }
+    .category-move:disabled { opacity: 0.1; cursor: default; }
+
+    .category-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 16px;
+    }
+
+    .category-title { font-size: 14px; font-weight: 600; }
+
+    .category-score-badge { display: flex; align-items: center; gap: 6px; }
+
+    .category-score {
+      font-size: 12px; font-weight: 700;
+      color: var(--primary); background: var(--primary-bg);
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    .category-toggle { color: var(--text-muted); font-size: 10px; transition: transform 0.2s; }
+    .category.collapsed .category-toggle { transform: rotate(-90deg); }
+
+    .category-delete {
+      width: 28px; height: 28px; background: none;
+      border: none; border-radius: 6px;
+      color: var(--text-muted); cursor: pointer;
+      display: grid; place-items: center;
+      opacity: 0.4; transition: all 0.15s;
+    }
+    .category .category-delete { opacity: 0.4; }
+    .category-delete:hover { color: var(--red); background: var(--red-bg); opacity: 1; }
+
+    .category-body { padding: 0 16px 14px; }
+    .category.collapsed .category-body { display: none; }
+
+    /* ===== ITEMS ===== */
+    .item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 0; border-bottom: 1px solid var(--border-light); gap: 10px;
+    }
+    .item:last-of-type { border-bottom: none; }
+
+    .item-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+
+    .item-check {
+      width: 22px; height: 22px;
+      border: 2px solid #cbd5e1; border-radius: 7px;
+      cursor: pointer; display: grid; place-items: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .item-check:hover { border-color: var(--primary); }
+    .item-check.checked {
+      background: var(--green); border-color: var(--green);
+      animation: pop 0.25s ease;
+    }
+    @keyframes pop { 50% { transform: scale(1.15); } }
+    .item-check.checked::after { content: '\2713'; color: #fff; font-size: 12px; font-weight: 700; }
+
+    .item-name {
+      font-size: 13px; color: var(--text-sec); font-weight: 500;
+      flex: 1; min-width: 0; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .item.done .item-name { color: var(--text-muted); text-decoration: line-through; }
+
+    .item-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+    .item-input {
+      width: 44px; height: 30px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--text);
+      text-align: center; font-size: 13px; font-weight: 600;
+      outline: none; font-family: inherit;
+    }
+    .item-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.12); }
+
+    .item-max { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    .item-delete {
+      width: 24px; height: 24px; background: none; border: none;
+      color: var(--text-muted); cursor: pointer; border-radius: 6px;
+      display: grid; place-items: center; font-size: 14px;
+      opacity: 0; transition: all 0.15s;
+    }
+    .item:hover .item-delete { opacity: 0.6; }
+    .item-delete:hover { color: var(--red); background: var(--red-bg); opacity: 1 !important; }
+
+    /* ===== ADD ITEM ===== */
+    .add-item-row {
+      display: flex; gap: 6px; padding-top: 10px;
+      border-top: 1px solid var(--border-light); margin-top: 2px;
+    }
+    .add-item-row input {
+      height: 34px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 0 10px;
+      font-size: 12px; outline: none; font-family: inherit;
+    }
+    .add-item-row input:first-child { flex: 1; }
+    .add-item-row input:focus { border-color: var(--primary); }
+    .add-item-row input[type="number"] { width: 50px; text-align: center; }
+    .add-item-row button {
+      height: 34px; padding: 0 14px;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .add-item-row button:hover { background: var(--primary-light); }
+
+    /* ===== ADD CATEGORY ===== */
+    .add-category-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 12px;
+      background: #fff; border: 2px dashed var(--border);
+      border-radius: 14px; color: var(--text-muted);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all 0.2s; margin-bottom: 10px;
+    }
+    .add-category-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+
+    /* ===== HISTORY ===== */
+    .history-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px; width: 100%;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text-muted);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: inherit; box-shadow: var(--shadow); margin-bottom: 10px;
+    }
+    .history-toggle:hover { color: var(--primary); border-color: var(--primary-border); }
+
+    .history-panel {
+      display: none; background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px; margin-bottom: 10px;
+      box-shadow: var(--shadow);
+    }
+    .history-panel.open { display: block; }
+
+    .history-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 12px;
+    }
+    .history-row:last-child { border-bottom: none; }
+    .history-date { color: var(--text-muted); font-weight: 500; }
+    .history-score { font-weight: 700; }
+
+    .streak-bar { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 10px; }
+    .streak-day { width: 14px; height: 14px; border-radius: 3px; background: var(--border-light); }
+    .streak-day.low { background: #bfdbfe; }
+    .streak-day.mid { background: #60a5fa; }
+    .streak-day.high { background: #3b82f6; }
+    .streak-day.full { background: var(--primary); }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(13,27,42,0.35); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff; border-radius: 18px; padding: 28px;
+      width: 100%; max-width: 380px; box-shadow: var(--shadow-lg);
+    }
+    .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+
+    .modal label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--text-sec); margin-bottom: 5px; margin-top: 12px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .modal input, .modal select {
+      width: 100%; height: 38px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 0 12px; font-size: 13px;
+      outline: none; font-family: inherit;
+    }
+    .modal input:focus { border-color: var(--primary); }
+
+    .modal-actions { display: flex; gap: 8px; margin-top: 22px; justify-content: flex-end; }
+    .modal-actions button {
+      padding: 8px 18px; border-radius: 8px; font-size: 13px;
+      font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+    }
+    .btn-cancel { background: var(--bg); color: var(--text-sec); }
+    .btn-confirm { background: var(--primary); color: #fff; }
+    .btn-cancel:hover { background: var(--border-light); }
+    .btn-confirm:hover { background: var(--primary-light); }
+
+    /* ===== DASHBOARD ===== */
+    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
 
     .dash-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; box-shadow: var(--shadow);
     }
-
-    .dash-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .dash-card-value {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .dash-card-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      font-weight: 500;
-    }
-
-    .dash-card-trend {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      margin-top: 8px;
-    }
-
+    .dash-card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+    .dash-card-value { font-size: 28px; font-weight: 800; line-height: 1; }
+    .dash-card-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+    .dash-card-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-top: 6px; }
     .trend-up { color: var(--green); background: var(--green-bg); }
     .trend-down { color: var(--red); background: var(--red-bg); }
     .trend-same { color: var(--text-muted); background: var(--bg); }
 
-    /* Bar Chart */
     .chart-container {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
     }
+    .chart-title { font-size: 13px; font-weight: 700; color: var(--text-sec); margin-bottom: 16px; }
 
-    .chart-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-    }
+    .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 150px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; max-width: 32px; border-radius: 5px 5px 2px 2px; transition: height 0.3s ease; min-height: 2px; cursor: pointer; }
+    .bar:hover { opacity: 0.75; }
+    .bar-label { font-size: 9px; color: var(--text-muted); font-weight: 600; }
+    .bar-value { font-size: 9px; font-weight: 700; color: var(--text-sec); }
 
-    .bar-chart {
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-      height: 160px;
-      padding-top: 10px;
-    }
+    .cat-breakdown { display: flex; flex-direction: column; gap: 10px; }
+    .cat-bar-row { display: flex; align-items: center; gap: 10px; }
+    .cat-bar-name { font-size: 11px; font-weight: 600; color: var(--text-sec); min-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-bar-track { flex: 1; height: 8px; background: var(--border-light); border-radius: 4px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+    .cat-bar-pct { font-size: 11px; font-weight: 700; min-width: 36px; text-align: right; }
 
-    .bar-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      height: 100%;
-      justify-content: flex-end;
-    }
+    .top-items-list { display: flex; flex-direction: column; gap: 6px; }
+    .top-item-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--bg); border-radius: 8px; }
+    .top-item-rank { width: 22px; height: 22px; border-radius: 6px; background: var(--primary-bg); color: var(--primary); font-size: 10px; font-weight: 800; display: grid; place-items: center; }
+    .top-item-name { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-sec); }
+    .top-item-score { font-size: 12px; font-weight: 700; }
 
-    .bar {
-      width: 100%;
-      max-width: 36px;
-      border-radius: 6px 6px 2px 2px;
-      background: var(--accent);
-      transition: height 0.3s ease;
-      min-height: 2px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .bar:hover { opacity: 0.8; }
-
-    .bar-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .bar-value {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    /* Category Breakdown */
-    .cat-breakdown {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .cat-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .cat-bar-name {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      min-width: 120px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .cat-bar-track {
-      flex: 1;
-      height: 10px;
-      background: var(--border-light);
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    .cat-bar-fill {
-      height: 100%;
-      border-radius: 5px;
-      transition: width 0.4s ease;
-    }
-
-    .cat-bar-pct {
-      font-size: 12px;
-      font-weight: 700;
-      min-width: 40px;
-      text-align: right;
-    }
-
-    /* Heatmap */
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .heatmap-cell {
-      aspect-ratio: 1;
-      border-radius: 4px;
-      background: var(--border-light);
-      position: relative;
-      cursor: pointer;
-    }
-
-    .heatmap-cell:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-    .heatmap-cell.l1 { background: #e9d5ff; }
-    .heatmap-cell.l2 { background: #c084fc; }
-    .heatmap-cell.l3 { background: #a855f7; }
-    .heatmap-cell.l4 { background: var(--accent); }
-
-    .heatmap-labels {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-bottom: 6px;
-    }
-
-    .heatmap-labels span {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    .heatmap-legend {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 12px;
-      justify-content: flex-end;
-    }
-
-    .heatmap-legend span {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .heatmap-legend-box {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
-
-    /* Top items */
-    .top-items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .top-item-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      background: var(--bg);
-      border-radius: 10px;
-    }
-
-    .top-item-rank {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: var(--accent-bg);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .top-item-name {
-      flex: 1;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .top-item-score {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .dash-section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-      margin-top: 8px;
-    }
-
-    /* ========== RESPONSIVE ========== */
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 640px) {
       .score-bar-inner { flex-direction: column; align-items: stretch; }
       .total-score { display: flex; align-items: center; justify-content: space-between; }
-      .score-breakdown { grid-template-columns: repeat(3, 1fr); }
-      .header-inner { padding: 12px 16px; }
-      .score-bar, .container, .tab-nav { padding: 0 16px; }
-      .dash-grid { grid-template-columns: repeat(2, 1fr); }
-      .cat-bar-name { min-width: 80px; }
-      .login-card { padding: 40px 28px; }
+      .score-breakdown { justify-content: center; }
+      .score-chip { min-width: 70px; }
+      .header-inner { padding: 10px 14px; }
+      .score-bar, .container { padding: 0 14px; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .login-card { padding: 36px 24px; }
+      .category-header { padding: 12px 12px; }
+      .category-body { padding: 0 12px 12px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Login Screen -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">L</div>
     <h1>LevelUp Habits</h1>
-    <p>Track your daily habits.<br>Build discipline. Stay consistent.</p>
+    <p>Build better habits.<br>Track progress. Stay consistent.</p>
     <button class="google-btn" onclick="googleSignIn()">
       <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
@@ -1257,7 +517,6 @@
   </div>
 </div>
 
-<!-- App Content -->
 <div class="app-content" id="appContent">
 
 <div class="header">
@@ -1273,7 +532,7 @@
         <button onclick="changeDate(1)">&#8250;</button>
       </div>
       <div class="user-profile">
-        <img class="user-avatar" id="userAvatar" src="" alt="User" onclick="toggleUserMenu()">
+        <img class="user-avatar" id="userAvatar" src="" alt="" onclick="toggleUserMenu()">
         <div class="user-menu" id="userMenu">
           <div class="user-menu-info">
             <div class="user-menu-name" id="userName"></div>
@@ -1291,20 +550,19 @@
   <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard</button>
 </div>
 
-<!-- TRACKER TAB -->
 <div class="tab-content active" id="tab-tracker">
 
 <div class="score-bar">
   <div class="score-bar-inner">
     <div class="total-score">
       <div class="progress-ring">
-        <svg width="96" height="96">
-          <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border-light)" stroke-width="7"/>
-          <circle id="progressCircle" cx="48" cy="48" r="40" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33"/>
+        <svg width="90" height="90">
+          <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border-light)" stroke-width="6"/>
+          <circle id="progressCircle" cx="45" cy="45" r="38" fill="none" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
         </svg>
         <div class="progress-text">
           <div class="number" id="totalScore">0</div>
-          <div class="max" id="totalMax">/ 100</div>
+          <div class="max" id="totalMax">/ 0</div>
         </div>
       </div>
     </div>
@@ -1321,38 +579,28 @@
 <div class="container">
   <button class="history-toggle" onclick="toggleHistory()">View Streak History</button>
   <div class="history-panel" id="historyPanel">
-    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">Last 30 Days</h3>
+    <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text-sec)">Last 30 Days</h3>
     <div class="streak-bar" id="streakBar"></div>
-    <div id="historyList" style="margin-top:16px;"></div>
+    <div id="historyList" style="margin-top:14px;"></div>
   </div>
 </div>
 
 </div>
-<!-- END TRACKER TAB -->
 
-<!-- DASHBOARD TAB -->
 <div class="tab-content" id="tab-dashboard">
-  <div class="container" style="margin-top:24px;">
-
-    <!-- KPI Cards -->
+  <div class="container" style="margin-top:20px;">
     <div class="dash-grid" id="dashKPIs"></div>
-
-    <!-- Weekly Bar Chart -->
     <div class="chart-container">
       <div class="chart-title">Daily Scores - Last 14 Days</div>
       <div class="bar-chart" id="dashBarChart"></div>
     </div>
-
-    <!-- Category Breakdown -->
     <div class="chart-container">
-      <div class="chart-title">Category Performance (Last 7 Days Avg)</div>
+      <div class="chart-title">Category Performance (7-Day Avg)</div>
       <div class="cat-breakdown" id="dashCatBreakdown"></div>
     </div>
-
-    <!-- Top & Bottom Items -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
       <div class="chart-container" style="margin-bottom:0">
-        <div class="chart-title">Most Consistent Items</div>
+        <div class="chart-title">Most Consistent</div>
         <div class="top-items-list" id="dashTopItems"></div>
       </div>
       <div class="chart-container" style="margin-bottom:0">
@@ -1360,14 +608,11 @@
         <div class="top-items-list" id="dashBottomItems"></div>
       </div>
     </div>
-
   </div>
 </div>
-<!-- END DASHBOARD TAB -->
 
 </div>
 
-<!-- Add Category Modal -->
 <div class="modal-overlay" id="addCategoryModal">
   <div class="modal">
     <h3>Add Category</h3>
@@ -1376,7 +621,7 @@
     <label>Icon (emoji)</label>
     <input id="newCatIcon" type="text" placeholder="e.g. 💪" maxlength="2">
     <label>Color</label>
-    <input id="newCatColor" type="color" value="#7c3aed" style="height:42px;padding:4px;cursor:pointer;">
+    <input id="newCatColor" type="color" value="#2563eb" style="height:40px;padding:4px;cursor:pointer;">
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('addCategoryModal')">Cancel</button>
       <button class="btn-confirm" onclick="addCategory()">Add</button>
@@ -1398,57 +643,35 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const provider = new firebase.auth.GoogleAuthProvider();
-
 let currentUser = null;
 
-function googleSignIn() {
-  auth.signInWithPopup(provider).catch(err => {
-    alert('Sign in failed: ' + err.message);
-  });
-}
-
+function googleSignIn() { auth.signInWithPopup(provider).catch(err => alert('Sign in failed: ' + err.message)); }
 function signOut() { auth.signOut(); }
+function toggleUserMenu() { document.getElementById('userMenu').classList.toggle('open'); }
 
-function toggleUserMenu() {
-  document.getElementById('userMenu').classList.toggle('open');
-}
-
-document.addEventListener('click', function(e) {
-  const profile = document.querySelector('.user-profile');
-  const menu = document.getElementById('userMenu');
-  if (profile && menu && !profile.contains(e.target)) {
-    menu.classList.remove('open');
-  }
+document.addEventListener('click', e => {
+  const p = document.querySelector('.user-profile');
+  const m = document.getElementById('userMenu');
+  if (p && m && !p.contains(e.target)) m.classList.remove('open');
 });
 
 async function syncFromFirestore(user) {
   try {
-    // Sync categories
     const userDoc = await db.collection('users').doc(user.uid).get();
-    if (userDoc.exists && userDoc.data().categories) {
-      localStorage.setItem(user.uid + '_timebox_categories', userDoc.data().categories);
-    }
-
-    // Sync last 30 days of data
+    if (userDoc.exists && userDoc.data().categories) localStorage.setItem(user.uid + '_timebox_categories', userDoc.data().categories);
     const daysSnap = await db.collection('users').doc(user.uid).collection('days').get();
-    daysSnap.forEach(doc => {
-      localStorage.setItem(user.uid + '_timebox_' + doc.id, JSON.stringify(doc.data()));
-    });
-  } catch (e) {
-    console.log('Firestore sync error:', e);
-  }
+    daysSnap.forEach(doc => localStorage.setItem(user.uid + '_timebox_' + doc.id, JSON.stringify(doc.data())));
+  } catch (e) { console.log('Sync error:', e); }
 }
 
-auth.onAuthStateChanged(async function(user) {
+auth.onAuthStateChanged(async user => {
   if (user) {
     currentUser = user;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appContent').style.display = 'block';
-    document.getElementById('userAvatar').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'U') + '&background=7c3aed&color=fff';
+    document.getElementById('userAvatar').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'U') + '&background=2563eb&color=fff';
     document.getElementById('userName').textContent = user.displayName || 'User';
     document.getElementById('userEmail').textContent = user.email;
-
-    // Pull data from Firestore first, then render
     await syncFromFirestore(user);
     render();
   } else {
@@ -1459,85 +682,54 @@ auth.onAuthStateChanged(async function(user) {
 });
 
 const DEFAULT_CATEGORIES = [];
-
 let currentDate = new Date();
 let activeFilter = null;
 
 function dateKey(d) { return d.toISOString().split('T')[0]; }
-
 function userPrefix() { return currentUser ? currentUser.uid + '_' : ''; }
 
 function getCategories() {
-  const key = userPrefix() + 'timebox_categories';
-  const saved = localStorage.getItem(key);
+  const saved = localStorage.getItem(userPrefix() + 'timebox_categories');
   if (saved) return JSON.parse(saved);
   return [];
 }
 
 function saveCategories(cats) {
   localStorage.setItem(userPrefix() + 'timebox_categories', JSON.stringify(cats));
-  if (currentUser) {
-    db.collection('users').doc(currentUser.uid).set({ categories: JSON.stringify(cats) }, { merge: true }).catch(() => {});
-  }
+  if (currentUser) db.collection('users').doc(currentUser.uid).set({ categories: JSON.stringify(cats) }, { merge: true }).catch(() => {});
 }
 
 function getDayData(date) {
-  const key = userPrefix() + 'timebox_' + dateKey(date);
-  const saved = localStorage.getItem(key);
+  const saved = localStorage.getItem(userPrefix() + 'timebox_' + dateKey(date));
   return saved ? JSON.parse(saved) : {};
 }
 
 function saveDayData(date, data) {
   const dk = dateKey(date);
   localStorage.setItem(userPrefix() + 'timebox_' + dk, JSON.stringify(data));
-  if (currentUser) {
-    db.collection('users').doc(currentUser.uid).collection('days').doc(dk).set(data).catch(() => {});
-  }
+  if (currentUser) db.collection('users').doc(currentUser.uid).collection('days').doc(dk).set(data).catch(() => {});
 }
 
-function changeDate(delta) {
-  currentDate.setDate(currentDate.getDate() + delta);
-  render();
-}
-
-function isToday(d) {
-  const t = new Date();
-  return d.toDateString() === t.toDateString();
-}
-
+function changeDate(d) { currentDate.setDate(currentDate.getDate() + d); render(); }
+function isToday(d) { return d.toDateString() === new Date().toDateString(); }
 function formatDate(d) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+  const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const w = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return `${w[d.getDay()]}, ${m[d.getMonth()]} ${d.getDate()}`;
 }
-
-function getCategoryScore(cat, dayData) {
-  let score = 0;
-  cat.items.forEach(item => { score += (dayData[item.id] || 0); });
-  return score;
-}
-
-function getCategoryMax(cat) {
-  return cat.items.reduce((sum, item) => sum + item.points, 0);
-}
+function getCategoryScore(cat, dd) { let s = 0; cat.items.forEach(i => s += (dd[i.id] || 0)); return s; }
+function getCategoryMax(cat) { return cat.items.reduce((s, i) => s + i.points, 0); }
 
 function render() {
   const cats = getCategories();
   const dayData = getDayData(currentDate);
-
   const dateEl = document.getElementById('dateDisplay');
-  dateEl.innerHTML = isToday(currentDate)
-    ? `<div class="today-label">Today</div>${formatDate(currentDate)}`
-    : formatDate(currentDate);
+  dateEl.innerHTML = isToday(currentDate) ? `<div class="today-label">Today</div>${formatDate(currentDate)}` : formatDate(currentDate);
 
-  let totalScore = 0;
-  let totalMax = 0;
-
+  let totalScore = 0, totalMax = 0;
   const catScores = cats.map(cat => {
-    const score = getCategoryScore(cat, dayData);
-    const max = getCategoryMax(cat);
-    totalScore += score;
-    totalMax += max;
+    const score = getCategoryScore(cat, dayData), max = getCategoryMax(cat);
+    totalScore += score; totalMax += max;
     return { cat, score, max };
   });
 
@@ -1545,61 +737,53 @@ function render() {
   document.getElementById('totalMax').textContent = `/ ${totalMax}`;
 
   const circle = document.getElementById('progressCircle');
-  const circumference = 2 * Math.PI * 40;
+  const circ = 2 * Math.PI * 38;
   const pct = totalMax > 0 ? totalScore / totalMax : 0;
-  circle.style.strokeDashoffset = circumference * (1 - pct);
+  circle.style.strokeDashoffset = circ * (1 - pct);
+  const sc = pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)';
+  circle.style.stroke = sc;
+  document.getElementById('totalScore').style.color = sc;
 
-  const scoreColor = pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : pct > 0 ? 'var(--accent)' : 'var(--text-muted)';
-  circle.style.stroke = scoreColor;
-  document.getElementById('totalScore').style.color = scoreColor;
-
-  const breakdownEl = document.getElementById('scoreBreakdown');
-  breakdownEl.innerHTML = catScores.map(({ cat, score, max }) => `
+  document.getElementById('scoreBreakdown').innerHTML = catScores.map(({ cat, score, max }) => `
     <div class="score-chip ${activeFilter === cat.id ? 'active' : ''}" onclick="toggleFilter('${cat.id}')">
       <div class="chip-name">${cat.icon} ${cat.name}</div>
       <span class="chip-score">${score}</span><span class="chip-max">/${max}</span>
-    </div>
-  `).join('');
+    </div>`).join('');
 
   const container = document.getElementById('categoriesContainer');
-  const filteredScores = activeFilter ? catScores.filter(c => c.cat.id === activeFilter) : catScores;
+  const fs = activeFilter ? catScores.filter(c => c.cat.id === activeFilter) : catScores;
+  const tc = fs.length;
 
-  const totalCats = filteredScores.length;
-  container.innerHTML = filteredScores.map(({ cat, score, max }, idx) => `
+  container.innerHTML = fs.map(({ cat, score, max }, idx) => `
     <div class="category" id="cat-${cat.id}">
       <div class="category-header" onclick="toggleCategory('${cat.id}')">
         <div class="category-header-left">
-          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',-1)" ${idx === 0 ? 'disabled' : ''} title="Move up">&#9650;</button>
-          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',1)" ${idx === totalCats - 1 ? 'disabled' : ''} title="Move down">&#9660;</button>
+          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',-1)" ${idx===0?'disabled':''}>&#9650;</button>
+          <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',1)" ${idx===tc-1?'disabled':''}>&#9660;</button>
           <div class="category-icon" style="background:${cat.color}15;color:${cat.color}">${cat.icon}</div>
           <div class="category-title">${cat.name}</div>
         </div>
         <div class="category-score-badge">
           <div class="category-score">${score} / ${max}</div>
           <span class="category-toggle">&#9662;</span>
-          <button class="category-delete" onclick="event.stopPropagation();deleteCategory('${cat.id}')" title="Delete category"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+          <button class="category-delete" onclick="event.stopPropagation();deleteCategory('${cat.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
         </div>
       </div>
       <div class="category-body">
         ${cat.items.map(item => {
-          const val = dayData[item.id] || 0;
-          const done = val >= item.points;
-          return `
-            <div class="item ${done ? 'done' : ''}">
+          const val = dayData[item.id] || 0, done = val >= item.points;
+          return `<div class="item ${done?'done':''}">
               <div class="item-left">
-                <div class="item-check ${done ? 'checked' : ''}" onclick="quickToggle('${cat.id}','${item.id}',${item.points})"></div>
+                <div class="item-check ${done?'checked':''}" onclick="quickToggle('${cat.id}','${item.id}',${item.points})"></div>
                 <div class="item-name">${item.name}</div>
               </div>
               <div class="item-right">
-                <input class="item-input" type="number" min="0" max="${item.points}" value="${val}"
-                  onchange="updateValue('${item.id}', this.value, ${item.points})"
-                  style="${done ? 'border-color:var(--green);color:var(--green)' : ''}">
+                <input class="item-input" type="number" min="0" max="${item.points}" value="${val}" onchange="updateValue('${item.id}',this.value,${item.points})" style="${done?'border-color:var(--green);color:var(--green)':''}">
                 <span class="item-max">/ ${item.points}</span>
-                <button class="item-delete" onclick="editItem('${cat.id}','${item.id}')" title="Edit" style="opacity:0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
-                <button class="item-delete" onclick="deleteItem('${cat.id}','${item.id}')" title="Remove">&times;</button>
+                <button class="item-delete" onclick="editItem('${cat.id}','${item.id}')" title="Edit" style="opacity:0.4"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+                <button class="item-delete" onclick="deleteItem('${cat.id}','${item.id}')">&times;</button>
               </div>
-            </div>
-          `;
+            </div>`;
         }).join('')}
         <div class="add-item-row">
           <input type="text" placeholder="Add new item..." id="newItem-${cat.id}">
@@ -1607,114 +791,75 @@ function render() {
           <button onclick="addItem('${cat.id}')">Add</button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function toggleFilter(catId) {
-  activeFilter = activeFilter === catId ? null : catId;
-  render();
+function toggleFilter(id) { activeFilter = activeFilter === id ? null : id; render(); }
+function toggleCategory(id) { const el = document.getElementById('cat-' + id); if (el) el.classList.toggle('collapsed'); }
+
+function quickToggle(cid, iid, max) {
+  const dd = getDayData(currentDate);
+  dd[iid] = (dd[iid] || 0) >= max ? 0 : max;
+  saveDayData(currentDate, dd); render();
 }
 
-function toggleCategory(catId) {
-  const el = document.getElementById('cat-' + catId);
-  if (el) el.classList.toggle('collapsed');
+function updateValue(iid, val, max) {
+  const dd = getDayData(currentDate);
+  dd[iid] = Math.max(0, Math.min(max, parseInt(val) || 0));
+  saveDayData(currentDate, dd); render();
 }
 
-function quickToggle(catId, itemId, maxPoints) {
-  const dayData = getDayData(currentDate);
-  const current = dayData[itemId] || 0;
-  dayData[itemId] = current >= maxPoints ? 0 : maxPoints;
-  saveDayData(currentDate, dayData);
-  render();
-}
-
-function updateValue(itemId, value, maxPoints) {
-  const dayData = getDayData(currentDate);
-  const num = Math.max(0, Math.min(maxPoints, parseInt(value) || 0));
-  dayData[itemId] = num;
-  saveDayData(currentDate, dayData);
-  render();
-}
-
-function addItem(catId) {
-  const nameInput = document.getElementById('newItem-' + catId);
-  const ptsInput = document.getElementById('newPts-' + catId);
-  const name = nameInput.value.trim();
-  const pts = parseInt(ptsInput.value);
+function addItem(cid) {
+  const n = document.getElementById('newItem-' + cid), p = document.getElementById('newPts-' + cid);
+  const name = n.value.trim(), pts = parseInt(p.value);
   if (!name) return;
-  if (!pts || pts < 1) { alert('Please enter a score for this item'); ptsInput.focus(); return; }
-  const cats = getCategories();
-  const cat = cats.find(c => c.id === catId);
+  if (!pts || pts < 1) { alert('Please enter a score'); p.focus(); return; }
+  const cats = getCategories(), cat = cats.find(c => c.id === cid);
   if (!cat) return;
-  const id = catId[0] + Date.now();
-  cat.items.push({ id, name, max: 10, value: 0, points: pts });
-  saveCategories(cats);
-  render();
+  cat.items.push({ id: cid[0] + Date.now(), name, max: 10, value: 0, points: pts });
+  saveCategories(cats); render();
 }
 
-function moveCategory(catId, direction) {
-  const cats = getCategories();
-  const idx = cats.findIndex(c => c.id === catId);
-  if (idx === -1) return;
-  const newIdx = idx + direction;
-  if (newIdx < 0 || newIdx >= cats.length) return;
-  const temp = cats[idx];
-  cats[idx] = cats[newIdx];
-  cats[newIdx] = temp;
-  saveCategories(cats);
-  render();
+function moveCategory(id, dir) {
+  const cats = getCategories(), i = cats.findIndex(c => c.id === id);
+  if (i === -1) return;
+  const ni = i + dir;
+  if (ni < 0 || ni >= cats.length) return;
+  [cats[i], cats[ni]] = [cats[ni], cats[i]];
+  saveCategories(cats); render();
 }
 
-function deleteCategory(catId) {
-  const cats = getCategories();
-  const cat = cats.find(c => c.id === catId);
-  if (!cat) return;
-  if (!confirm('Delete "' + cat.name + '" category and all its items?')) return;
-  const updated = cats.filter(c => c.id !== catId);
-  saveCategories(updated);
-  render();
+function deleteCategory(id) {
+  const cats = getCategories(), cat = cats.find(c => c.id === id);
+  if (!cat || !confirm('Delete "' + cat.name + '"?')) return;
+  saveCategories(cats.filter(c => c.id !== id)); render();
 }
 
-function editItem(catId, itemId) {
-  const cats = getCategories();
-  const cat = cats.find(c => c.id === catId);
+function editItem(cid, iid) {
+  const cats = getCategories(), cat = cats.find(c => c.id === cid);
   if (!cat) return;
-  const item = cat.items.find(i => i.id === itemId);
+  const item = cat.items.find(i => i.id === iid);
   if (!item) return;
-
-  const newName = prompt('Edit item name:', item.name);
-  if (newName === null) return;
-  if (newName.trim() === '') { alert('Name cannot be empty'); return; }
-
-  const newPts = prompt('Edit max score:', item.points);
-  if (newPts === null) return;
-  const pts = parseInt(newPts);
-  if (!pts || pts < 1) { alert('Please enter a valid score (1 or more)'); return; }
-
-  item.name = newName.trim();
-  item.points = pts;
-  saveCategories(cats);
-  render();
+  const nn = prompt('Edit name:', item.name);
+  if (nn === null) return;
+  if (!nn.trim()) { alert('Name cannot be empty'); return; }
+  const np = prompt('Edit max score:', item.points);
+  if (np === null) return;
+  const pts = parseInt(np);
+  if (!pts || pts < 1) { alert('Invalid score'); return; }
+  item.name = nn.trim(); item.points = pts;
+  saveCategories(cats); render();
 }
 
-function deleteItem(catId, itemId) {
-  const cats = getCategories();
-  const cat = cats.find(c => c.id === catId);
+function deleteItem(cid, iid) {
+  const cats = getCategories(), cat = cats.find(c => c.id === cid);
   if (!cat) return;
-  cat.items = cat.items.filter(i => i.id !== itemId);
-  saveCategories(cats);
-  render();
+  cat.items = cat.items.filter(i => i.id !== iid);
+  saveCategories(cats); render();
 }
 
-function openAddCategoryModal() {
-  document.getElementById('addCategoryModal').classList.add('open');
-  document.getElementById('newCatName').focus();
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+function openAddCategoryModal() { document.getElementById('addCategoryModal').classList.add('open'); document.getElementById('newCatName').focus(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 function addCategory() {
   const name = document.getElementById('newCatName').value.trim();
@@ -1722,55 +867,35 @@ function addCategory() {
   const color = document.getElementById('newCatColor').value;
   if (!name) return;
   const cats = getCategories();
-  const id = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
-  cats.push({ id, name, icon, color, items: [] });
-  saveCategories(cats);
-  closeModal('addCategoryModal');
+  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, items: [] });
+  saveCategories(cats); closeModal('addCategoryModal');
   document.getElementById('newCatName').value = '';
   document.getElementById('newCatIcon').value = '';
   render();
 }
 
 function toggleHistory() {
-  const panel = document.getElementById('historyPanel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) renderHistory();
+  const p = document.getElementById('historyPanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) renderHistory();
 }
 
 function renderHistory() {
   const cats = getCategories();
-  const listEl = document.getElementById('historyList');
-  const streakEl = document.getElementById('streakBar');
-  let html = '';
-  let streakHtml = '';
-
+  let html = '', sh = '';
   for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dayData = getDayData(d);
-    let totalScore = 0;
-    let totalMax = 0;
-    cats.forEach(cat => {
-      totalScore += getCategoryScore(cat, dayData);
-      totalMax += getCategoryMax(cat);
-    });
-    const pct = totalMax > 0 ? totalScore / totalMax : 0;
-    let level = '';
-    if (pct > 0.8) level = 'full';
-    else if (pct > 0.6) level = 'high';
-    else if (pct > 0.3) level = 'mid';
-    else if (pct > 0) level = 'low';
-    streakHtml += `<div class="streak-day ${level}" title="${dateKey(d)}: ${totalScore}/${totalMax}"></div>`;
-    if (totalScore > 0) {
-      html = `<div class="history-row">
-        <span class="history-date">${formatDate(d)}</span>
-        <span class="history-score" style="color:${pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : 'var(--accent)'}">${totalScore} / ${totalMax}</span>
-      </div>` + html;
-    }
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const dd = getDayData(d);
+    let ts = 0, tm = 0;
+    cats.forEach(c => { ts += getCategoryScore(c, dd); tm += getCategoryMax(c); });
+    const p = tm > 0 ? ts / tm : 0;
+    let lv = '';
+    if (p > 0.8) lv = 'full'; else if (p > 0.6) lv = 'high'; else if (p > 0.3) lv = 'mid'; else if (p > 0) lv = 'low';
+    sh += `<div class="streak-day ${lv}" title="${dateKey(d)}: ${ts}/${tm}"></div>`;
+    if (ts > 0) html = `<div class="history-row"><span class="history-date">${formatDate(d)}</span><span class="history-score" style="color:${p>=0.8?'var(--green)':p>=0.5?'var(--amber)':'var(--primary)'}">${ts}/${tm}</span></div>` + html;
   }
-
-  streakEl.innerHTML = streakHtml;
-  listEl.innerHTML = html || '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No data yet. Start tracking today!</div>';
+  document.getElementById('streakBar').innerHTML = sh;
+  document.getElementById('historyList').innerHTML = html || '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px">No data yet</div>';
 }
 
 function switchTab(tab) {
@@ -1783,291 +908,62 @@ function switchTab(tab) {
 
 function renderDashboard() {
   const cats = getCategories();
-
-  // Gather 30 days of data
-  const daysData = [];
+  const dd = [];
   for (let i = 0; i < 30; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+    const d = new Date(); d.setDate(d.getDate() - i);
     const dayData = getDayData(d);
-    let total = 0, max = 0;
-    const catScores = {};
-    cats.forEach(cat => {
-      const s = getCategoryScore(cat, dayData);
-      const m = getCategoryMax(cat);
-      total += s;
-      max += m;
-      catScores[cat.id] = { score: s, max: m };
-    });
-    daysData.push({ date: d, dayData, total, max, pct: max > 0 ? total / max : 0, catScores });
+    let total = 0, max = 0; const cs = {};
+    cats.forEach(c => { const s = getCategoryScore(c, dayData), m = getCategoryMax(c); total += s; max += m; cs[c.id] = { score: s, max: m }; });
+    dd.push({ date: d, dayData, total, max, pct: max > 0 ? total / max : 0, catScores: cs });
   }
 
-  // ===== KPI CARDS =====
-  const today = daysData[0];
-  const thisWeek = daysData.slice(0, 7);
-  const lastWeek = daysData.slice(7, 14);
-
-  const thisWeekAvg = thisWeek.reduce((s, d) => s + d.pct, 0) / thisWeek.length;
-  const lastWeekAvg = lastWeek.reduce((s, d) => s + d.pct, 0) / lastWeek.length;
-  const weekTrend = thisWeekAvg - lastWeekAvg;
-
-  const activeDays = daysData.filter(d => d.total > 0).length;
+  const today = dd[0], tw = dd.slice(0, 7), lw = dd.slice(7, 14);
+  const twa = tw.reduce((s, d) => s + d.pct, 0) / tw.length;
+  const lwa = lw.reduce((s, d) => s + d.pct, 0) / lw.length;
+  const wt = twa - lwa;
   let streak = 0;
-  for (let i = 0; i < daysData.length; i++) {
-    if (daysData[i].total > 0) streak++;
-    else break;
-  }
+  for (let i = 0; i < dd.length; i++) { if (dd[i].total > 0) streak++; else break; }
 
-  const bestDay = daysData.reduce((best, d) => d.pct > best.pct ? d : best, daysData[0]);
-
-  const trendHtml = (val) => {
-    if (val > 0.01) return `<div class="dash-card-trend trend-up">&#9650; ${Math.round(val*100)}%</div>`;
-    if (val < -0.01) return `<div class="dash-card-trend trend-down">&#9660; ${Math.round(Math.abs(val)*100)}%</div>`;
-    return `<div class="dash-card-trend trend-same">&#8212; Same</div>`;
-  };
+  const trend = v => v > 0.01 ? `<div class="dash-card-trend trend-up">&#9650; ${Math.round(v*100)}%</div>` : v < -0.01 ? `<div class="dash-card-trend trend-down">&#9660; ${Math.round(Math.abs(v)*100)}%</div>` : `<div class="dash-card-trend trend-same">&#8212; Same</div>`;
 
   document.getElementById('dashKPIs').innerHTML = `
-    <div class="dash-card">
-      <div class="dash-card-label">Today's Score</div>
-      <div class="dash-card-value" style="color:${today.pct >= 0.8 ? 'var(--green)' : today.pct >= 0.5 ? 'var(--amber)' : 'var(--accent)'}">${today.total}</div>
-      <div class="dash-card-sub">out of ${today.max}</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">Weekly Average</div>
-      <div class="dash-card-value" style="color:var(--accent)">${Math.round(thisWeekAvg * 100)}%</div>
-      ${trendHtml(weekTrend)}
-    </div>
-    <div class="dash-card">
-      <div class="dash-card-label">Current Streak</div>
-      <div class="dash-card-value" style="color:var(--amber)">${streak}</div>
-      <div class="dash-card-sub">day${streak !== 1 ? 's' : ''} in a row</div>
-    </div>
-  `;
+    <div class="dash-card"><div class="dash-card-label">Today</div><div class="dash-card-value" style="color:${today.pct>=0.8?'var(--green)':today.pct>=0.5?'var(--amber)':'var(--primary)'}">${today.total}</div><div class="dash-card-sub">of ${today.max}</div></div>
+    <div class="dash-card"><div class="dash-card-label">Weekly Avg</div><div class="dash-card-value" style="color:var(--primary)">${Math.round(twa*100)}%</div>${trend(wt)}</div>
+    <div class="dash-card"><div class="dash-card-label">Streak</div><div class="dash-card-value" style="color:var(--amber)">${streak}</div><div class="dash-card-sub">day${streak!==1?'s':''}</div></div>`;
 
-  // ===== BAR CHART (14 days) =====
-  const last14 = daysData.slice(0, 14).reverse();
-  const maxScore = Math.max(...last14.map(d => d.total), 1);
-  const dayNames = ['S','M','T','W','T','F','S'];
-
-  document.getElementById('dashBarChart').innerHTML = last14.map(d => {
-    const h = Math.max(2, (d.total / maxScore) * 140);
-    const color = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--accent)' : 'var(--border)';
-    return `<div class="bar-col">
-      <div class="bar-value">${d.total}</div>
-      <div class="bar" style="height:${h}px;background:${color}" title="${formatDate(d.date)}: ${d.total}/${d.max}"></div>
-      <div class="bar-label">${dayNames[d.date.getDay()]}</div>
-    </div>`;
+  const l14 = dd.slice(0, 14).reverse();
+  const ms = Math.max(...l14.map(d => d.total), 1);
+  const dn = ['S','M','T','W','T','F','S'];
+  document.getElementById('dashBarChart').innerHTML = l14.map(d => {
+    const h = Math.max(2, (d.total / ms) * 130);
+    const c = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--primary)' : 'var(--border)';
+    return `<div class="bar-col"><div class="bar-value">${d.total}</div><div class="bar" style="height:${h}px;background:${c}"></div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
   }).join('');
 
-  // ===== CATEGORY BREAKDOWN (7 day avg) =====
-  const catAvgs = cats.map(cat => {
-    let totalScore = 0, totalMax = 0;
-    thisWeek.forEach(d => {
-      const cs = d.catScores[cat.id];
-      if (cs) { totalScore += cs.score; totalMax += cs.max; }
-    });
-    const pct = totalMax > 0 ? totalScore / totalMax : 0;
-    return { cat, pct, totalScore, totalMax };
+  const ca = cats.map(c => {
+    let ts = 0, tm = 0;
+    tw.forEach(d => { const x = d.catScores[c.id]; if (x) { ts += x.score; tm += x.max; } });
+    return { cat: c, pct: tm > 0 ? ts / tm : 0 };
   }).sort((a, b) => b.pct - a.pct);
 
-  document.getElementById('dashCatBreakdown').innerHTML = catAvgs.map(({ cat, pct }) => `
-    <div class="cat-bar-row">
-      <div class="cat-bar-name">${cat.icon} ${cat.name}</div>
-      <div class="cat-bar-track">
-        <div class="cat-bar-fill" style="width:${Math.round(pct*100)}%;background:${cat.color}"></div>
-      </div>
-      <div class="cat-bar-pct" style="color:${pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : 'var(--accent)'}">${Math.round(pct*100)}%</div>
-    </div>
-  `).join('');
+  document.getElementById('dashCatBreakdown').innerHTML = ca.map(({ cat, pct }) => `
+    <div class="cat-bar-row"><div class="cat-bar-name">${cat.icon} ${cat.name}</div><div class="cat-bar-track"><div class="cat-bar-fill" style="width:${Math.round(pct*100)}%;background:${cat.color}"></div></div><div class="cat-bar-pct" style="color:${pct>=0.8?'var(--green)':pct>=0.5?'var(--amber)':'var(--primary)'}">${Math.round(pct*100)}%</div></div>`).join('');
 
-  // ===== HEATMAP (56 days / 8 weeks) =====
-  const heatmapDays = [];
-  const startDay = new Date();
-  // Go back to last Sunday
-  startDay.setDate(startDay.getDate() - startDay.getDay() - 49);
-  for (let i = 0; i < 56; i++) {
-    const d = new Date(startDay);
-    d.setDate(d.getDate() + i);
-    const dayData = getDayData(d);
-    let total = 0, max = 0;
-    cats.forEach(cat => {
-      total += getCategoryScore(cat, dayData);
-      max += getCategoryMax(cat);
-    });
-    const pct = max > 0 ? total / max : 0;
-    let level = '';
-    if (pct > 0.8) level = 'l4';
-    else if (pct > 0.6) level = 'l3';
-    else if (pct > 0.3) level = 'l2';
-    else if (pct > 0) level = 'l1';
-    heatmapDays.push({ d, pct, level, total, max });
-  }
+  const is = [];
+  cats.forEach(c => c.items.forEach(item => {
+    let done = 0;
+    tw.forEach(d => { if ((d.dayData[item.id] || 0) >= item.points) done++; });
+    is.push({ name: item.name, icon: c.icon, completed: done, pct: done / 7 });
+  }));
 
-  document.getElementById('dashHeatmap').innerHTML = heatmapDays.map(h =>
-    `<div class="heatmap-cell ${h.level}" title="${formatDate(h.d)}: ${h.total}/${h.max} (${Math.round(h.pct*100)}%)"></div>`
-  ).join('');
+  const sorted = [...is].sort((a, b) => b.pct - a.pct);
+  document.getElementById('dashTopItems').innerHTML = sorted.slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}</div><div class="top-item-score" style="color:var(--green)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
 
-  // ===== TOP & BOTTOM ITEMS =====
-  const itemStats = [];
-  cats.forEach(cat => {
-    cat.items.forEach(item => {
-      let completed = 0;
-      thisWeek.forEach(d => {
-        const val = d.dayData[item.id] || 0;
-        if (val >= item.points) completed++;
-      });
-      itemStats.push({ name: item.name, icon: cat.icon, completed, total: 7, pct: completed / 7 });
-    });
-  });
-
-  const sorted = [...itemStats].sort((a, b) => b.pct - a.pct);
-  const top5 = sorted.slice(0, 5);
-  const bottom5 = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5);
-
-  document.getElementById('dashTopItems').innerHTML = top5.map((item, i) => `
-    <div class="top-item-row">
-      <div class="top-item-rank">${i + 1}</div>
-      <div class="top-item-name">${item.icon} ${item.name}</div>
-      <div class="top-item-score" style="color:var(--green)">${item.completed}/7</div>
-    </div>
-  `).join('') || '<div style="color:var(--text-muted);font-size:12px;padding:12px">No data yet</div>';
-
-  document.getElementById('dashBottomItems').innerHTML = bottom5.map((item, i) => `
-    <div class="top-item-row">
-      <div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i + 1}</div>
-      <div class="top-item-name">${item.icon} ${item.name}</div>
-      <div class="top-item-score" style="color:var(--red)">${item.completed}/7</div>
-    </div>
-  `).join('') || '<div style="color:var(--text-muted);font-size:12px;padding:12px">No data yet</div>';
+  document.getElementById('dashBottomItems').innerHTML = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}</div><div class="top-item-score" style="color:var(--red)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
 }
 
-function toggleDataTable() {
-  const panel = document.getElementById('dataTablePanel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) renderDataTable();
-}
-
-function renderDataTable() {
-  const cats = getCategories();
-  const days = parseInt(document.getElementById('tableRange').value) || 30;
-  const wrap = document.getElementById('dataTableWrap');
-
-  // Build all item names for columns
-  const allItems = [];
-  cats.forEach(cat => {
-    cat.items.forEach(item => {
-      allItems.push({ catName: cat.name, itemName: item.name, id: item.id, points: item.points });
-    });
-  });
-
-  let html = '<table class="data-table"><thead><tr>';
-  html += '<th>Date</th>';
-  cats.forEach(cat => {
-    html += `<th>${cat.icon} ${cat.name}</th>`;
-  });
-  html += '<th>Total</th>';
-  html += '</tr></thead><tbody>';
-
-  for (let i = 0; i < days; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dayData = getDayData(d);
-
-    let rowTotal = 0;
-    let totalMax = 0;
-
-    html += '<tr>';
-    html += `<td style="font-weight:600;color:var(--text)">${formatDate(d)}</td>`;
-
-    cats.forEach(cat => {
-      const score = getCategoryScore(cat, dayData);
-      const max = getCategoryMax(cat);
-      rowTotal += score;
-      totalMax += max;
-
-      let cls = 'score-zero';
-      if (score >= max && max > 0) cls = 'score-full';
-      else if (score > 0) cls = 'score-partial';
-
-      html += `<td class="score-cell ${cls}">${score}/${max}</td>`;
-    });
-
-    const pct = totalMax > 0 ? rowTotal / totalMax : 0;
-    let totalCls = 'score-zero';
-    if (pct >= 0.8) totalCls = 'score-full';
-    else if (pct > 0) totalCls = 'score-partial';
-
-    html += `<td class="score-cell ${totalCls}" style="font-size:13px">${rowTotal}/${totalMax}</td>`;
-    html += '</tr>';
-  }
-
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
-
-function exportCSV() {
-  const cats = getCategories();
-  const allItems = [];
-  cats.forEach(cat => {
-    cat.items.forEach(item => {
-      allItems.push({ catName: cat.name, itemName: item.name, id: item.id, points: item.points });
-    });
-  });
-
-  // Header row
-  let csv = 'Date';
-  allItems.forEach(item => {
-    csv += ',"' + item.catName + ' - ' + item.itemName.replace(/"/g, '""') + '"';
-  });
-  cats.forEach(cat => {
-    csv += ',"' + cat.name + ' Total"';
-  });
-  csv += ',Total Score,Total Max,Percentage\n';
-
-  // Data rows - last 90 days
-  for (let i = 89; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dayData = getDayData(d);
-
-    csv += dateKey(d);
-
-    allItems.forEach(item => {
-      csv += ',' + (dayData[item.id] || 0);
-    });
-
-    let rowTotal = 0;
-    let totalMax = 0;
-    cats.forEach(cat => {
-      const score = getCategoryScore(cat, dayData);
-      const max = getCategoryMax(cat);
-      rowTotal += score;
-      totalMax += max;
-      csv += ',' + score;
-    });
-
-    const pct = totalMax > 0 ? Math.round((rowTotal / totalMax) * 100) : 0;
-    csv += ',' + rowTotal + ',' + totalMax + ',' + pct + '%\n';
-  }
-
-  // Download
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'timebox-data-' + dateKey(new Date()) + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-document.getElementById('addCategoryModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal('addCategoryModal');
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal('addCategoryModal');
-});
-
+document.getElementById('addCategoryModal').addEventListener('click', function(e) { if (e.target === this) closeModal('addCategoryModal'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal('addCategoryModal'); });
 render();
 </script>
 </body>
