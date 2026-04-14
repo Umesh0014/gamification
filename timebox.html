@@ -214,9 +214,17 @@
     .cat-breakdown { display: flex; flex-direction: column; gap: 8px; }
     .cat-bar-row { display: flex; align-items: center; gap: 8px; }
     .cat-bar-name { font-size: 12px; color: var(--text-sec); min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-bar-mid { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
     .cat-bar-track { flex: 1; height: 4px; background: var(--border-light); border-radius: 2px; overflow: hidden; }
     .cat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+    .cat-sparkline { flex-shrink: 0; position: relative; cursor: pointer; }
+    .cat-sparkline-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 5px 8px; border-radius: 5px; font-size: 10px; white-space: nowrap; z-index: 10; pointer-events: none; }
+    .cat-sparkline-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 3px solid transparent; border-top-color: var(--text); }
+    .cat-trend { font-size: 12px; flex-shrink: 0; }
     .cat-bar-pct { font-size: 12px; font-weight: 500; min-width: 32px; text-align: right; }
+    @media (max-width: 768px) {
+      .cat-sparkline { display: none; }
+    }
     .top-items-list { display: flex; flex-direction: column; gap: 3px; }
     .top-item-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: #fff; border-radius: 6px; }
     .top-item-rank { width: 18px; height: 18px; border-radius: 50%; background: var(--card); color: var(--text-sec); font-size: 9px; font-weight: 600; display: grid; place-items: center; }
@@ -1166,6 +1174,46 @@ function switchTab(tab) {
   if (tab === 'dashboard') renderDashboard();
 }
 
+function generateSparklinePath(data, w, h) {
+  const pts = [];
+  const filtered = data.map((v, i) => v !== null ? { x: (i / (data.length - 1)) * w, y: h - ((v / 100) * h * 0.85) - h * 0.05, v } : null);
+
+  // Build segments (break at nulls)
+  const segments = [];
+  let seg = [];
+  filtered.forEach(p => {
+    if (p) seg.push(p);
+    else { if (seg.length) segments.push(seg); seg = []; }
+  });
+  if (seg.length) segments.push(seg);
+
+  let path = '';
+  segments.forEach(pts => {
+    if (pts.length === 1) {
+      path += `M${pts[0].x},${pts[0].y} L${pts[0].x},${pts[0].y} `;
+      return;
+    }
+    path += `M${pts[0].x},${pts[0].y} `;
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1], p1 = pts[i];
+      const cpx1 = p0.x + (p1.x - p0.x) * 0.4;
+      const cpx2 = p1.x - (p1.x - p0.x) * 0.4;
+      path += `C${cpx1},${p0.y} ${cpx2},${p1.y} ${p1.x},${p1.y} `;
+    }
+  });
+  return { path, lastPt: filtered.filter(p => p).pop() };
+}
+
+function renderSparklineSVG(data, color, w, h) {
+  if (!data || data.every(v => v === null || v === 0)) return '';
+  const { path, lastPt } = generateSparklinePath(data, w, h);
+  if (!path) return '';
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block">
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
+    ${lastPt ? `<circle cx="${lastPt.x}" cy="${lastPt.y}" r="2.5" fill="${color}"/>` : ''}
+  </svg>`;
+}
+
 function renderDashboard() {
   const cats = getCategories();
   const dd = [];
@@ -1250,12 +1298,42 @@ function renderDashboard() {
 
   const ca = cats.map(c => {
     let ts = 0, tm = 0;
-    tw.forEach(d => { const x = d.catScores[c.id]; if (x) { ts += x.score; tm += x.max; } });
-    return { cat: c, pct: tm > 0 ? ts / tm : 0 };
+    const dailyScores = [];
+    tw.forEach(d => {
+      const x = d.catScores[c.id];
+      if (x) {
+        ts += x.score; tm += x.max;
+        dailyScores.push(x.max > 0 ? Math.round((x.score / x.max) * 100) : null);
+      } else {
+        dailyScores.push(null);
+      }
+    });
+    // Today's score pct
+    const todayPct = dailyScores[0];
+    const avg = dailyScores.filter(v => v !== null).reduce((s, v) => s + v, 0) / (dailyScores.filter(v => v !== null).length || 1);
+    let trendArrow = '<span class="cat-trend" style="color:var(--text-muted)">&rarr;</span>';
+    if (todayPct !== null && todayPct > avg * 1.05) trendArrow = '<span class="cat-trend" style="color:var(--green)">&uarr;</span>';
+    else if (todayPct !== null && todayPct < avg * 0.95) trendArrow = '<span class="cat-trend" style="color:var(--red)">&darr;</span>';
+
+    // Reverse so oldest is first for sparkline
+    const sparkData = [...dailyScores].reverse();
+    const tipValues = [...dailyScores].reverse().map(v => v !== null ? v : '–').join(' · ');
+
+    return { cat: c, pct: tm > 0 ? ts / tm : 0, sparkData, trendArrow, tipValues };
   }).sort((a, b) => b.pct - a.pct);
 
-  document.getElementById('dashCatBreakdown').innerHTML = ca.map(({ cat, pct }) => `
-    <div class="cat-bar-row"><div class="cat-bar-name">${cat.icon} ${cat.name}</div><div class="cat-bar-track"><div class="cat-bar-fill" style="width:${Math.round(pct*100)}%;background:${cat.color}"></div></div><div class="cat-bar-pct" style="color:${pct>=0.8?'var(--green)':pct>=0.5?'var(--amber)':'var(--primary)'}">${Math.round(pct*100)}%</div></div>`).join('');
+  document.getElementById('dashCatBreakdown').innerHTML = ca.map(({ cat, pct, sparkData, trendArrow, tipValues }) => {
+    const sparkSvg = renderSparklineSVG(sparkData, cat.color || '#999', 64, 24);
+    return `<div class="cat-bar-row">
+      <div class="cat-bar-name">${cat.icon} ${cat.name}</div>
+      <div class="cat-bar-mid">
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${Math.round(pct*100)}%;background:${cat.color}"></div></div>
+        ${sparkSvg ? `<div class="cat-sparkline" onclick="showSparkTip(event,this)" data-tip="Last 7 days: ${tipValues}">${sparkSvg}</div>` : ''}
+        ${trendArrow}
+      </div>
+      <div class="cat-bar-pct" style="color:${pct>=0.8?'var(--green)':pct>=0.5?'var(--amber)':'var(--primary)'}">${Math.round(pct*100)}%</div>
+    </div>`;
+  }).join('');
 
   const is = [];
   cats.forEach(c => c.items.forEach(item => {
@@ -1449,6 +1527,20 @@ function renderHeatmap() {
 }
 
 let _activeTip = null;
+
+function showSparkTip(e, el) {
+  e.stopPropagation();
+  if (_activeTip) { _activeTip.remove(); _activeTip = null; }
+  const tip = document.createElement('div');
+  tip.className = 'cat-sparkline-tip';
+  tip.textContent = el.dataset.tip;
+  el.style.position = 'relative';
+  el.appendChild(tip);
+  _activeTip = tip;
+  setTimeout(() => {
+    document.addEventListener('click', function rm() { if (_activeTip) { _activeTip.remove(); _activeTip = null; } document.removeEventListener('click', rm); }, { once: true });
+  }, 10);
+}
 function showHeatmapTip(e, el) {
   e.stopPropagation();
   // Remove existing
