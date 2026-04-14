@@ -1378,17 +1378,8 @@ function render() {
     });
   }
 
-  // Category breakdown (inline)
-  const breakdownEl = document.getElementById('scoreBreakdown');
-  if (hasPillars && Object.keys(pillarScores).length > 0) {
-    breakdownEl.innerHTML = Object.entries(pillarScores).map(([p, v]) =>
-      `<div class="score-ring-cat" style="color:${pillarColors[p]}">${p} <span>${v.score}</span><span style="color:var(--text-muted)">/${v.max}</span></div>`
-    ).join('');
-  } else {
-    breakdownEl.innerHTML = catScores.filter(c => c.max > 0).map(({ cat, score }) =>
-      `<div class="score-ring-cat">${cat.icon} ${cat.name} <span>${score}</span></div>`
-    ).join('');
-  }
+  // Category breakdown (hidden)
+  document.getElementById('scoreBreakdown').innerHTML = '';
 
   // Category chips (clickable filter)
   document.getElementById('scoreChips').innerHTML = catScores.map(({ cat, score, max }) => `
