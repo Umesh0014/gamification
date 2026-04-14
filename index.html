@@ -191,10 +191,108 @@
     .top-item-name { flex: 1; font-size: 12px; color: var(--text-sec); }
     .top-item-score { font-size: 12px; font-weight: 600; }
 
+    /* ===== CHECK-IN ===== */
+    .checkin-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 14px; margin-bottom: 8px;
+      background: var(--text); color: #fff; border: none; border-radius: var(--r);
+      font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .checkin-btn:hover { opacity: 0.85; }
+    .checkin-btn.done-btn { background: var(--green); }
+
+    .checkin-overlay {
+      display: none; position: fixed; inset: 0; background: #fff;
+      z-index: 500; flex-direction: column; overflow: hidden;
+    }
+    .checkin-overlay.open { display: flex; }
+
+    .checkin-top {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .checkin-close {
+      background: none; border: none; font-size: 14px; color: var(--text-muted);
+      cursor: pointer; font-family: inherit; padding: 4px 8px;
+    }
+    .checkin-close:hover { color: var(--text); }
+    .checkin-progress-text { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+    .checkin-progress-bar {
+      height: 3px; background: var(--border-light);
+    }
+    .checkin-progress-fill {
+      height: 100%; background: var(--text); transition: width 0.3s ease;
+    }
+
+    .checkin-body {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 40px 24px; overflow-y: auto;
+    }
+
+    .checkin-icon { font-size: 48px; margin-bottom: 16px; }
+    .checkin-cat-name { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+    .checkin-item-name { font-size: 22px; font-weight: 600; margin-bottom: 32px; text-align: center; line-height: 1.3; }
+
+    .checkin-toggle-row {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+    }
+    .checkin-toggle {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 2px solid var(--border); background: #fff;
+      display: grid; place-items: center; cursor: pointer;
+      transition: all 0.2s; font-size: 28px; color: var(--text-muted);
+    }
+    .checkin-toggle.checked {
+      background: var(--green); border-color: var(--green); color: #fff;
+    }
+    .checkin-toggle:hover { border-color: var(--green); }
+
+    .checkin-score-input {
+      width: 80px; height: 56px; text-align: center;
+      font-size: 28px; font-weight: 600; font-family: inherit;
+      border: 1px solid var(--border); border-radius: 10px;
+      outline: none; background: var(--card); color: var(--text);
+    }
+    .checkin-score-input:focus { border-color: var(--text); }
+    .checkin-score-max { font-size: 18px; color: var(--text-muted); font-weight: 500; }
+
+    .checkin-bottom {
+      padding: 16px 20px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px;
+    }
+    .checkin-nav-btn {
+      flex: 1; padding: 14px; border-radius: 10px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: inherit; border: none; transition: opacity 0.15s;
+    }
+    .checkin-back { background: var(--card); color: var(--text-sec); }
+    .checkin-next { background: var(--text); color: #fff; }
+    .checkin-back:hover { background: var(--border); }
+    .checkin-next:hover { opacity: 0.85; }
+    .checkin-nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* Summary screen */
+    .checkin-summary { text-align: center; }
+    .checkin-summary-score { font-size: 56px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .checkin-summary-max { font-size: 18px; color: var(--text-muted); margin-bottom: 24px; }
+    .checkin-summary-msg { font-size: 15px; color: var(--text-sec); margin-bottom: 32px; line-height: 1.5; }
+    .checkin-summary-cats { text-align: left; width: 100%; max-width: 320px; }
+    .checkin-summary-cat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 14px;
+    }
+    .checkin-summary-cat:last-child { border-bottom: none; }
+    .checkin-summary-cat-name { color: var(--text-sec); }
+    .checkin-summary-cat-score { font-weight: 600; }
+
     @media (max-width: 640px) {
       .score-bar-inner { flex-direction: column; align-items: stretch; }
       .total-score { display: flex; align-items: center; justify-content: space-between; }
       .dash-grid { grid-template-columns: 1fr; }
+      .checkin-item-name { font-size: 20px; }
+      .checkin-body { padding: 30px 20px; }
     }
   </style>
 </head>
@@ -265,6 +363,8 @@
   </div>
 </div>
 
+<div class="container" id="checkinContainer"></div>
+
 <div class="container" id="categoriesContainer"></div>
 
 <div class="container">
@@ -322,6 +422,18 @@
       <button class="btn-confirm" onclick="addCategory()">Add</button>
     </div>
   </div>
+</div>
+
+<!-- Check-in Overlay -->
+<div class="checkin-overlay" id="checkinOverlay">
+  <div class="checkin-top">
+    <button class="checkin-close" onclick="closeCheckin()">Cancel</button>
+    <span class="checkin-progress-text" id="checkinProgressText"></span>
+    <span style="width:50px"></span>
+  </div>
+  <div class="checkin-progress-bar"><div class="checkin-progress-fill" id="checkinProgressFill"></div></div>
+  <div class="checkin-body" id="checkinBody"></div>
+  <div class="checkin-bottom" id="checkinBottom"></div>
 </div>
 
 <script>
@@ -601,6 +713,171 @@ function render() {
         </div>
       </div>
     </div>`).join('');
+}
+
+  // Check-in button
+  const checkinEl = document.getElementById('checkinContainer');
+  const allItems = [];
+  cats.forEach(c => c.items.forEach(i => allItems.push(i)));
+  if (allItems.length > 0 && isToday(currentDate)) {
+    const logged = allItems.some(i => (dayData[i.id] || 0) > 0);
+    const allDone = allItems.every(i => (dayData[i.id] || 0) >= i.points);
+    if (allDone) {
+      checkinEl.innerHTML = `<button class="checkin-btn done-btn" onclick="openCheckin()">All done today! Review</button>`;
+    } else {
+      checkinEl.innerHTML = `<button class="checkin-btn" onclick="openCheckin()">${logged ? 'Continue check-in' : 'Check in for today'}</button>`;
+    }
+  } else {
+    checkinEl.innerHTML = '';
+  }
+}
+
+// ===== CHECK-IN FLOW =====
+let checkinItems = [];
+let checkinStep = 0;
+let checkinData = {};
+
+function openCheckin() {
+  const cats = getCategories();
+  checkinItems = [];
+  cats.forEach(cat => {
+    cat.items.forEach(item => {
+      checkinItems.push({ ...item, catName: cat.name, catIcon: cat.icon, catColor: cat.color });
+    });
+  });
+  if (checkinItems.length === 0) return;
+
+  const dayData = getDayData(currentDate);
+  checkinData = { ...dayData };
+  checkinStep = 0;
+
+  // Find first incomplete item
+  for (let i = 0; i < checkinItems.length; i++) {
+    if ((checkinData[checkinItems[i].id] || 0) < checkinItems[i].points) {
+      checkinStep = i;
+      break;
+    }
+  }
+
+  document.getElementById('checkinOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderCheckinStep();
+}
+
+function closeCheckin() {
+  document.getElementById('checkinOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderCheckinStep() {
+  const total = checkinItems.length;
+  const isSummary = checkinStep >= total;
+  const body = document.getElementById('checkinBody');
+  const bottom = document.getElementById('checkinBottom');
+  const progressText = document.getElementById('checkinProgressText');
+  const progressFill = document.getElementById('checkinProgressFill');
+
+  if (isSummary) {
+    // Summary screen
+    progressText.textContent = 'Summary';
+    progressFill.style.width = '100%';
+
+    let totalScore = 0;
+    checkinItems.forEach(i => totalScore += (checkinData[i.id] || 0));
+
+    const cats = getCategories();
+    const catSummary = cats.map(cat => {
+      let s = 0, m = 0;
+      cat.items.forEach(i => { s += (checkinData[i.id] || 0); m += i.points; });
+      return { name: cat.name, icon: cat.icon, score: s, max: m };
+    }).filter(c => c.max > 0);
+
+    const pct = Math.round(totalScore);
+    let msg = '';
+    if (pct >= 80) msg = 'Outstanding day! Keep this momentum going.';
+    else if (pct >= 60) msg = 'Great effort today. You are on track.';
+    else if (pct >= 40) msg = 'Good start. Tomorrow, aim a little higher.';
+    else if (pct > 0) msg = 'Every step counts. Show up again tomorrow.';
+    else msg = 'Ready to start tracking? Go back and check off items.';
+
+    body.innerHTML = `
+      <div class="checkin-summary">
+        <div class="checkin-summary-score">${totalScore}</div>
+        <div class="checkin-summary-max">out of 100</div>
+        <div class="checkin-summary-msg">${msg}</div>
+        <div class="checkin-summary-cats">
+          ${catSummary.map(c => `
+            <div class="checkin-summary-cat">
+              <span class="checkin-summary-cat-name">${c.icon} ${c.name}</span>
+              <span class="checkin-summary-cat-score" style="color:${c.score >= c.max ? 'var(--green)' : c.score > 0 ? 'var(--text)' : 'var(--text-muted)'}">${c.score}/${c.max}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    bottom.innerHTML = `
+      <button class="checkin-nav-btn checkin-back" onclick="checkinStep--;renderCheckinStep()">Back</button>
+      <button class="checkin-nav-btn checkin-next" style="background:var(--green)" onclick="confirmCheckin()">Save check-in</button>
+    `;
+    return;
+  }
+
+  const item = checkinItems[checkinStep];
+  const val = checkinData[item.id] || 0;
+  const done = val >= item.points;
+
+  progressText.textContent = `${checkinStep + 1} of ${total}`;
+  progressFill.style.width = `${((checkinStep + 1) / (total + 1)) * 100}%`;
+
+  body.innerHTML = `
+    <div class="checkin-cat-name">${item.catIcon} ${item.catName}</div>
+    <div class="checkin-item-name">${item.name}</div>
+    <div class="checkin-toggle-row">
+      <div class="checkin-toggle ${done ? 'checked' : ''}" onclick="checkinToggle(${checkinStep})">
+        ${done ? '&#10003;' : ''}
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:8px;">
+      <input class="checkin-score-input" type="number" min="0" max="${item.points}" value="${val}" id="checkinInput" onchange="checkinSetValue(${checkinStep},this.value)">
+      <span class="checkin-score-max">/ ${item.points}</span>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--text-muted)">Tap circle to toggle, or enter score</div>
+  `;
+
+  bottom.innerHTML = `
+    <button class="checkin-nav-btn checkin-back" onclick="checkinPrev()" ${checkinStep === 0 ? 'disabled' : ''}>Back</button>
+    <button class="checkin-nav-btn checkin-next" onclick="checkinNext()">${checkinStep === total - 1 ? 'Review' : 'Next'}</button>
+  `;
+}
+
+function checkinToggle(step) {
+  const item = checkinItems[step];
+  const current = checkinData[item.id] || 0;
+  checkinData[item.id] = current >= item.points ? 0 : item.points;
+  renderCheckinStep();
+}
+
+function checkinSetValue(step, val) {
+  const item = checkinItems[step];
+  checkinData[item.id] = Math.max(0, Math.min(item.points, parseInt(val) || 0));
+  renderCheckinStep();
+}
+
+function checkinNext() {
+  checkinStep++;
+  renderCheckinStep();
+}
+
+function checkinPrev() {
+  if (checkinStep > 0) checkinStep--;
+  renderCheckinStep();
+}
+
+function confirmCheckin() {
+  saveDayData(currentDate, checkinData);
+  closeCheckin();
+  render();
 }
 
 function toggleFilter(id) { activeFilter = activeFilter === id ? null : id; render(); }
