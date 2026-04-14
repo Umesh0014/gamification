@@ -642,26 +642,9 @@
     </div>
     <div id="dashIntention"></div>
     <div class="dash-grid" id="dashKPIs"></div>
-    <div id="personalBests"></div>
     <div class="chart-container">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div class="chart-title" style="margin-bottom:0">Activity</div>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <div id="chartToggle"></div>
-          <div class="heatmap-toggle">
-            <button class="heatmap-toggle-btn active" onclick="setChartMode('heatmap')">Heatmap</button>
-            <button class="heatmap-toggle-btn" onclick="setChartMode('bars')">Bar chart</button>
-          </div>
-        </div>
-      </div>
-      <div id="heatmapSection">
-        <div class="heatmap-filters" id="heatmapFilters"></div>
-        <div class="heatmap-container">
-          <div class="heatmap-grid-wrap" id="heatmapGrid"></div>
-        </div>
-        <div class="heatmap-insights" id="heatmapInsights"></div>
-      </div>
-      <div class="bar-chart" id="dashBarChart" style="display:none"></div>
+      <div class="chart-title">Daily Scores - Last 14 Days</div>
+      <div class="bar-chart" id="dashBarChart"></div>
     </div>
     <div class="chart-container">
       <div class="chart-title">Category Performance (7-Day Avg)</div>
@@ -2058,41 +2041,12 @@ function renderDashboard() {
   const l14 = dd.slice(0, 14).reverse();
   const dn = ['S','M','T','W','T','F','S'];
 
-  // Chart toggle
-  const toggleEl = document.getElementById('chartToggle');
-  if (dHasPillars) {
-    toggleEl.innerHTML = `<button onclick="toggleChartView()" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-family:inherit;color:var(--text-sec)" id="chartViewBtn">${window._chartByPillar ? 'Show Total' : 'By Pillar'}</button>`;
-  } else {
-    toggleEl.innerHTML = '';
-  }
-
-  if (window._chartByPillar && dHasPillars) {
-    // Stacked pillar bars
-    const pillarsUsed = ['Health', 'Wealth', 'Soul'].filter(p => cats.some(c => c.pillar === p));
-    const maxPillarTotal = Math.max(...l14.map(d => {
-      let t = 0;
-      pillarsUsed.forEach(p => cats.filter(c => c.pillar === p).forEach(c => t += getCategoryScore(c, d.dayData)));
-      return t;
-    }), 1);
-
-    document.getElementById('dashBarChart').innerHTML = l14.map(d => {
-      let bars = '';
-      pillarsUsed.forEach(p => {
-        let ps = 0;
-        cats.filter(c => c.pillar === p).forEach(c => ps += getCategoryScore(c, d.dayData));
-        const h = Math.max(0, (ps / maxPillarTotal) * 120);
-        bars += `<div style="width:100%;max-width:24px;height:${h}px;background:${dPillarColors[p]};border-radius:2px;min-height:${ps>0?2:0}px" title="${p}: ${ps}"></div>`;
-      });
-      return `<div class="bar-col"><div style="display:flex;flex-direction:column;gap:1px;align-items:center;justify-content:flex-end;height:100%">${bars}</div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
-    }).join('');
-  } else {
-    const ms = Math.max(...l14.map(d => d.total), 1);
-    document.getElementById('dashBarChart').innerHTML = l14.map(d => {
-      const h = Math.max(2, (d.total / ms) * 130);
-      const c = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--primary)' : 'var(--border)';
-      return `<div class="bar-col"><div class="bar-value">${d.total}</div><div class="bar" style="height:${h}px;background:${c}"></div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
-    }).join('');
-  }
+  const ms = Math.max(...l14.map(d => d.total), 1);
+  document.getElementById('dashBarChart').innerHTML = l14.map(d => {
+    const h = Math.max(2, (d.total / ms) * 130);
+    const c = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--primary)' : 'var(--border)';
+    return `<div class="bar-col"><div class="bar-value">${d.total}</div><div class="bar" style="height:${h}px;background:${c}"></div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
+  }).join('');
 
   const ca = cats.map(c => {
     let ts = 0, tm = 0;
@@ -2147,9 +2101,6 @@ function renderDashboard() {
 
   document.getElementById('dashBottomItems').innerHTML = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}${pillarTag(it.pillar)}</div><div class="top-item-score" style="color:var(--red)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
 
-  // Render heatmap if active
-  if (window._chartMode === 'heatmap') renderHeatmap();
-  renderPersonalBests();
   renderDashIntention();
 }
 
