@@ -1570,7 +1570,7 @@ function render() {
         }).join('')}
         <div class="add-item-row">
           <input type="text" placeholder="Add new item..." id="newItem-${cat.id}">
-          <input type="number" placeholder="Pts" min="1" max="20" value="2" id="newPts-${cat.id}">
+          <input type="number" placeholder="Score" min="1" max="20" value="" id="newPts-${cat.id}">
           <button onclick="addItem('${cat.id}')">Add</button>
         </div>
       </div>
@@ -1608,8 +1608,9 @@ function addItem(catId) {
   const nameInput = document.getElementById('newItem-' + catId);
   const ptsInput = document.getElementById('newPts-' + catId);
   const name = nameInput.value.trim();
-  const pts = parseInt(ptsInput.value) || 2;
+  const pts = parseInt(ptsInput.value);
   if (!name) return;
+  if (!pts || pts < 1) { alert('Please enter a score for this item'); ptsInput.focus(); return; }
   const cats = getCategories();
   const cat = cats.find(c => c.id === catId);
   if (!cat) return;
