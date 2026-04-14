@@ -1556,13 +1556,13 @@ function render() {
             <div class="item ${done ? 'done' : ''}">
               <div class="item-left">
                 <div class="item-check ${done ? 'checked' : ''}" onclick="quickToggle('${cat.id}','${item.id}',${item.points})"></div>
-                <div class="item-name">${item.name}</div>
+                <div class="item-name" onclick="editItemName('${cat.id}','${item.id}')" style="cursor:pointer" title="Click to edit">${item.name}</div>
               </div>
               <div class="item-right">
                 <input class="item-input" type="number" min="0" max="${item.points}" value="${val}"
                   onchange="updateValue('${item.id}', this.value, ${item.points})"
                   style="${done ? 'border-color:var(--green);color:var(--green)' : ''}">
-                <span class="item-max">/ ${item.points}</span>
+                <span class="item-max" onclick="editItemPoints('${cat.id}','${item.id}')" style="cursor:pointer" title="Click to edit score">/ ${item.points}</span>
                 <button class="item-delete" onclick="deleteItem('${cat.id}','${item.id}')" title="Remove">&times;</button>
               </div>
             </div>
@@ -1627,6 +1627,34 @@ function deleteCategory(catId) {
   if (!confirm('Delete "' + cat.name + '" category and all its items?')) return;
   const updated = cats.filter(c => c.id !== catId);
   saveCategories(updated);
+  render();
+}
+
+function editItemName(catId, itemId) {
+  const cats = getCategories();
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  const item = cat.items.find(i => i.id === itemId);
+  if (!item) return;
+  const newName = prompt('Edit item name:', item.name);
+  if (newName === null || newName.trim() === '') return;
+  item.name = newName.trim();
+  saveCategories(cats);
+  render();
+}
+
+function editItemPoints(catId, itemId) {
+  const cats = getCategories();
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  const item = cat.items.find(i => i.id === itemId);
+  if (!item) return;
+  const newPts = prompt('Edit max score for "' + item.name + '":', item.points);
+  if (newPts === null) return;
+  const pts = parseInt(newPts);
+  if (!pts || pts < 1) { alert('Please enter a valid score (1 or more)'); return; }
+  item.points = pts;
+  saveCategories(cats);
   render();
 }
 
