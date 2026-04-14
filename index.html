@@ -103,6 +103,28 @@
     .chip-score { font-size: 14px; font-weight: 600; color: var(--text); }
     .chip-max { font-size: 10px; color: var(--text-muted); }
 
+    /* Weekly Intention */
+    .intention-banner { max-width: 640px; margin: 12px auto 0; padding: 0 20px; }
+    .intention-card { background: #fafafa; border-left: 4px solid var(--text); border-radius: 0 var(--r) var(--r) 0; padding: 14px 16px; min-height: 48px; }
+    .intention-prompt { background: #f0fdf4; border-left: 4px solid var(--green); border-radius: 0 var(--r) var(--r) 0; padding: 16px; }
+    .intention-prompt-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .intention-prompt-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .intention-input-wrap { display: flex; gap: 8px; align-items: flex-start; }
+    .intention-input { flex: 1; height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px; font-family: inherit; outline: none; color: var(--text); background: #fff; }
+    .intention-input:focus { border-color: var(--text); }
+    .intention-save-btn { height: 36px; padding: 0 14px; background: var(--text); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .intention-save-btn:hover { opacity: 0.85; }
+    .intention-counter { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right; }
+    .intention-display { display: flex; align-items: center; gap: 8px; }
+    .intention-icon { font-size: 14px; flex-shrink: 0; }
+    .intention-text { flex: 1; font-size: 13px; color: var(--text-sec); }
+    .intention-text em { font-style: italic; color: var(--text); }
+    .intention-edit-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 4px; }
+    .intention-edit-btn:hover { color: var(--text); }
+    .intention-ghost { max-width: 640px; margin: 8px auto 0; padding: 0 20px; font-size: 12px; color: var(--text-muted); }
+    .intention-ghost a { color: var(--text-sec); cursor: pointer; text-decoration: underline; }
+    .intention-dismiss { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; float: right; }
+
     /* TimeBox Blocks */
     .tb-section { max-width: 640px; margin: 14px auto 0; padding: 0 20px; }
     .tb-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; cursor: pointer; user-select: none; }
@@ -476,6 +498,8 @@
 
 <div class="tab-content active" id="tab-tracker">
 
+<div id="intentionArea"></div>
+
 <div class="backdate-banner" id="backdateBanner" style="display:none">
   <div class="backdate-banner-inner">
     <div class="backdate-banner-dot"></div>
@@ -521,6 +545,7 @@
 
 <div class="tab-content" id="tab-dashboard">
   <div class="container" style="margin-top:20px;">
+    <div id="dashIntention"></div>
     <div class="dash-grid" id="dashKPIs"></div>
     <div id="personalBests"></div>
     <div class="chart-container">
@@ -646,6 +671,9 @@ async function syncFromFirestore(user) {
     if (userDoc.exists && userDoc.data().categories) localStorage.setItem(user.uid + '_timebox_categories', userDoc.data().categories);
     const daysSnap = await db.collection('users').doc(user.uid).collection('days').get();
     daysSnap.forEach(doc => localStorage.setItem(user.uid + '_timebox_' + doc.id, JSON.stringify(doc.data())));
+    // Sync intentions
+    const intSnap = await db.collection('users').doc(user.uid).collection('intentions').get();
+    intSnap.forEach(doc => localStorage.setItem(user.uid + '_intention_' + doc.id, doc.data().intention));
   } catch (e) { console.log('Sync error:', e); }
 }
 
@@ -818,6 +846,173 @@ function formatDate(d) {
 }
 function getCategoryScore(cat, dd) { let s = 0; cat.items.forEach(i => s += (dd[i.id] || 0)); return s; }
 function getCategoryMax(cat) { return cat.items.reduce((s, i) => s + i.points, 0); }
+
+// ===== WEEKLY INTENTION =====
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toLocaleDateString('en-CA');
+}
+
+function getIntention(weekStart) {
+  return localStorage.getItem(userPrefix() + 'intention_' + weekStart) || null;
+}
+
+function saveIntention(weekStart, text) {
+  const clean = text.replace(/<[^>]*>/g, '').trim().substring(0, 140);
+  localStorage.setItem(userPrefix() + 'intention_' + weekStart, clean);
+  if (currentUser) {
+    db.collection('users').doc(currentUser.uid).collection('intentions').doc(weekStart).set({ intention: clean, createdAt: new Date().toISOString() }).catch(() => {});
+  }
+}
+
+function dismissIntentionPrompt(weekStart) {
+  localStorage.setItem(userPrefix() + 'intention_dismissed_' + weekStart, 'true');
+  renderIntention();
+}
+
+function isIntentionDismissed(weekStart) {
+  return localStorage.getItem(userPrefix() + 'intention_dismissed_' + weekStart) === 'true';
+}
+
+function getAllIntentions() {
+  const prefix = userPrefix() + 'intention_';
+  const all = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(prefix) && !key.includes('dismissed')) {
+      const ws = key.replace(prefix, '');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(ws)) {
+        all.push({ weekStart: ws, intention: localStorage.getItem(key) });
+      }
+    }
+  }
+  return all.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
+}
+
+function renderIntention() {
+  const el = document.getElementById('intentionArea');
+  if (!el) return;
+  const today = new Date();
+  const isSunday = today.getDay() === 0;
+  const thisWeekStart = getWeekStart(today);
+  const nextWeekStart = isSunday ? getWeekStart(new Date(today.getTime() + 86400000)) : null;
+
+  const currentIntention = getIntention(thisWeekStart);
+  let html = '';
+
+  // Show current week's intention (Mon-Sun)
+  if (currentIntention) {
+    html += `<div class="intention-banner">
+      <div class="intention-card" id="intentionDisplay">
+        <div class="intention-display">
+          <span class="intention-icon">🎯</span>
+          <span class="intention-text">This week: <em>"${currentIntention}"</em></span>
+          <button class="intention-edit-btn" onclick="editIntention('${thisWeekStart}')">✎</button>
+        </div>
+      </div>
+    </div>`;
+  } else if (!isSunday) {
+    // Ghost prompt Mon-Sat
+    html += `<div class="intention-ghost">No intention set this week · <a onclick="showIntentionInput('${thisWeekStart}')">Add one now</a></div>`;
+  }
+
+  // Sunday: prompt for next week
+  if (isSunday && nextWeekStart) {
+    const nextIntention = getIntention(nextWeekStart);
+    if (!nextIntention && !isIntentionDismissed(nextWeekStart)) {
+      html += `<div class="intention-banner" style="margin-top:8px">
+        <div class="intention-prompt">
+          <button class="intention-dismiss" onclick="dismissIntentionPrompt('${nextWeekStart}')">&times;</button>
+          <div class="intention-prompt-title">🌱 New week starting tomorrow</div>
+          <div class="intention-prompt-sub">What's your one focus for this week?</div>
+          <div class="intention-input-wrap">
+            <input class="intention-input" id="intentionInput" maxlength="140" placeholder="e.g. Ship the heatmap and do yoga daily" oninput="updateIntentionCounter()">
+            <button class="intention-save-btn" onclick="submitIntention('${nextWeekStart}')">Set intention</button>
+          </div>
+          <div class="intention-counter" id="intentionCounter">0 / 140</div>
+        </div>
+      </div>`;
+    } else if (nextIntention) {
+      html += `<div class="intention-banner" style="margin-top:8px">
+        <div class="intention-card" style="border-left-color:var(--green)">
+          <div class="intention-display">
+            <span class="intention-icon">🌱</span>
+            <span class="intention-text">Next week: <em>"${nextIntention}"</em></span>
+            <button class="intention-edit-btn" onclick="editIntention('${nextWeekStart}')">✎</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+function updateIntentionCounter() {
+  const input = document.getElementById('intentionInput');
+  const counter = document.getElementById('intentionCounter');
+  if (input && counter) counter.textContent = input.value.length + ' / 140';
+}
+
+function submitIntention(weekStart) {
+  const input = document.getElementById('intentionInput');
+  if (!input || !input.value.trim()) return;
+  saveIntention(weekStart, input.value);
+  renderIntention();
+}
+
+function showIntentionInput(weekStart) {
+  const el = document.getElementById('intentionArea');
+  el.innerHTML = `<div class="intention-banner">
+    <div class="intention-prompt" style="border-left-color:var(--text)">
+      <div class="intention-prompt-title">🎯 Set your weekly focus</div>
+      <div class="intention-input-wrap">
+        <input class="intention-input" id="intentionInput" maxlength="140" placeholder="One sentence focus for this week" oninput="updateIntentionCounter()">
+        <button class="intention-save-btn" onclick="submitIntention('${weekStart}')">Save</button>
+        <button class="intention-save-btn" style="background:var(--card);color:var(--text-sec)" onclick="renderIntention()">Cancel</button>
+      </div>
+      <div class="intention-counter" id="intentionCounter">0 / 140</div>
+    </div>
+  </div>`;
+  document.getElementById('intentionInput').focus();
+}
+
+function editIntention(weekStart) {
+  const current = getIntention(weekStart) || '';
+  const el = document.getElementById('intentionArea');
+  // Find the right banner and replace inline
+  el.innerHTML = `<div class="intention-banner">
+    <div class="intention-card">
+      <div class="intention-input-wrap">
+        <input class="intention-input" id="intentionInput" maxlength="140" value="${current.replace(/"/g, '&quot;')}" oninput="updateIntentionCounter()">
+        <button class="intention-save-btn" onclick="submitIntention('${weekStart}')">Save</button>
+        <button class="intention-save-btn" style="background:var(--card);color:var(--text-sec)" onclick="renderIntention()">Cancel</button>
+      </div>
+      <div class="intention-counter" id="intentionCounter">${current.length} / 140</div>
+    </div>
+  </div>`;
+  document.getElementById('intentionInput').focus();
+}
+
+function renderDashIntention() {
+  const el = document.getElementById('dashIntention');
+  if (!el) return;
+  const thisWeekStart = getWeekStart(new Date());
+  const intention = getIntention(thisWeekStart);
+  if (intention) {
+    el.innerHTML = `<div class="intention-card" style="margin-bottom:10px">
+      <div class="intention-display">
+        <span class="intention-icon">🎯</span>
+        <span class="intention-text">This week: <em>"${intention}"</em></span>
+      </div>
+    </div>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
 
 function render() {
   const cats = getCategories();
@@ -1045,6 +1240,7 @@ function render() {
     container.innerHTML = fs.map(({ cat, score, max }, idx) => catCard(cat, score, max, idx)).join('');
   }
 
+  renderIntention();
 }
 
 function toggleBlock(block) {
@@ -1702,6 +1898,7 @@ function renderDashboard() {
   // Render heatmap if active
   if (window._chartMode === 'heatmap') renderHeatmap();
   renderPersonalBests();
+  renderDashIntention();
 }
 
 window._chartByPillar = false;
