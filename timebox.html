@@ -383,6 +383,30 @@
     }
     .suggestion-chip:hover { background: var(--primary); color: #fff; }
 
+    .ai-suggest-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 12px; background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border: none; border-radius: 20px;
+      font-size: 10px; font-weight: 700; color: #fff;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .ai-suggest-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .ai-suggest-btn:disabled { opacity: 0.5; cursor: wait; }
+    .ai-suggest-btn svg { width: 12px; height: 12px; }
+
+    .ai-suggestions {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      padding: 8px 0;
+    }
+    .ai-chip {
+      padding: 4px 10px; background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1px solid #c7d2fe; border-radius: 20px;
+      font-size: 11px; font-weight: 500; color: #4338ca;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .ai-chip:hover { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; border-color: transparent; }
+
     /* ===== ADD CATEGORY ===== */
     .add-category-btn {
       display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -900,11 +924,21 @@ function render() {
           const sugs = getSuggestions(cat.name);
           const existing = cat.items.map(i => i.name.toLowerCase());
           const filtered = sugs ? sugs.filter(s => !existing.includes(s.toLowerCase())) : [];
-          if (filtered.length === 0) return '';
-          return `<div class="suggestions-row">
-            <div class="suggestions-label">Suggested items</div>
-            ${filtered.map(s => `<button class="suggestion-chip" onclick="addSuggestion('${cat.id}','${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
+          let html = '';
+          if (filtered.length > 0) {
+            html += `<div class="suggestions-row">
+              <div class="suggestions-label">Suggested items</div>
+              ${filtered.map(s => `<button class="suggestion-chip" onclick="addSuggestion('${cat.id}','${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
+            </div>`;
+          }
+          html += `<div style="padding:6px 0;display:flex;align-items:center;gap:8px;">
+            <button class="ai-suggest-btn" id="aiBtn-${cat.id}" onclick="event.stopPropagation();aiSuggest('${cat.id}','${cat.name.replace(/'/g, "\\'")}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7z"/></svg>
+              AI Suggest
+            </button>
+            <div class="ai-suggestions" id="aiSugs-${cat.id}"></div>
           </div>`;
+          return html;
         })()}
         <div class="add-item-row">
           <input type="text" placeholder="Add new item..." id="newItem-${cat.id}">
@@ -952,6 +986,38 @@ function addItem(cid) {
   if (pts > remaining) { alert('Score too high. Only ' + remaining + ' points remaining out of 100.'); p.focus(); return; }
   cat.items.push({ id: cid[0] + Date.now(), name, max: 10, value: 0, points: pts });
   saveCategories(cats); render();
+}
+
+async function aiSuggest(catId, catName) {
+  const btn = document.getElementById('aiBtn-' + catId);
+  const container = document.getElementById('aiSugs-' + catId);
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7z"/></svg> Thinking...';
+
+  try {
+    const res = await fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category: catName })
+    });
+    const data = await res.json();
+    if (data.suggestions && data.suggestions.length > 0) {
+      const cats = getCategories();
+      const cat = cats.find(c => c.id === catId);
+      const existing = cat ? cat.items.map(i => i.name.toLowerCase()) : [];
+      const filtered = data.suggestions.filter(s => !existing.includes(s.toLowerCase()));
+      container.innerHTML = filtered.map(s =>
+        `<button class="ai-chip" onclick="addSuggestion('${catId}','${s.replace(/'/g, "\\'")}')">${s}</button>`
+      ).join('');
+    } else {
+      container.innerHTML = '<span style="font-size:11px;color:var(--text-muted)">No suggestions found</span>';
+    }
+  } catch (e) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--red)">Failed to get suggestions. Check API key.</span>';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7z"/></svg> AI Suggest';
 }
 
 function addSuggestion(catId, name) {
