@@ -103,6 +103,19 @@
     .chip-score { font-size: 14px; font-weight: 600; color: var(--text); }
     .chip-max { font-size: 10px; color: var(--text-muted); }
 
+    /* TimeBox Blocks */
+    .tb-section { max-width: 640px; margin: 14px auto 0; padding: 0 20px; }
+    .tb-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; cursor: pointer; user-select: none; }
+    .tb-header-left { display: flex; align-items: center; gap: 6px; }
+    .tb-block-icon { font-size: 14px; }
+    .tb-block-name { font-size: 13px; font-weight: 600; color: var(--text-sec); }
+    .tb-now { font-size: 9px; background: var(--green-bg); color: var(--green); padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+    .tb-block-score { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .tb-toggle { color: var(--text-muted); font-size: 9px; transition: transform 0.2s; }
+    .tb-section.collapsed .tb-toggle { transform: rotate(-90deg); }
+    .tb-section.collapsed .tb-body { max-height: 0; overflow: hidden; opacity: 0; }
+    .tb-body { transition: max-height 0.3s ease, opacity 0.2s ease; max-height: 2000px; opacity: 1; }
+
     .container { max-width: 640px; margin: 10px auto 0; padding: 0 20px; }
     .category { background: var(--card); border-radius: var(--r); margin-bottom: 6px; overflow: hidden; }
     .category-header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -568,6 +581,13 @@
     <input id="newCatName" type="text" placeholder="e.g. Fitness">
     <label>Icon (emoji)</label>
     <input id="newCatIcon" type="text" placeholder="e.g. 💪" maxlength="2">
+    <label>Time Block</label>
+    <select id="newCatTimeBlock" style="width:100%;height:36px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
+      <option value="">Anytime</option>
+      <option value="morning">Morning 🌅</option>
+      <option value="afternoon">Afternoon ☀️</option>
+      <option value="evening">Evening 🌙</option>
+    </select>
     <label>Pillar (optional)</label>
     <select id="newCatPillar" style="width:100%;height:36px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
       <option value="">None</option>
@@ -895,34 +915,37 @@ function render() {
   const fs = activeFilter ? catScores.filter(c => c.cat.id === activeFilter) : catScores;
   const tc = fs.length;
 
-  // Sort by pillar groups if pillars exist
-  let orderedFs = fs;
-  if (hasPillars && !activeFilter) {
-    const pillarOrder = ['Health', 'Wealth', 'Soul', null];
-    orderedFs = [...fs].sort((a, b) => {
-      const ai = pillarOrder.indexOf(a.cat.pillar || null);
-      const bi = pillarOrder.indexOf(b.cat.pillar || null);
-      return ai - bi;
-    });
-  }
-
-  let lastPillar = '__none__';
   const pillarBg = { Health: '#f0fdf4', Wealth: '#fefce8', Soul: '#f5f3ff' };
   const pillarFg = { Health: '#16a34a', Wealth: '#ca8a04', Soul: '#7c3aed' };
 
-  container.innerHTML = orderedFs.map(({ cat, score, max }, idx) => {
-    let header = '';
-    if (hasPillars && !activeFilter) {
-      const p = cat.pillar || null;
-      if (p !== lastPillar) {
-        lastPillar = p;
-        const label = p || 'Other';
-        const bg = pillarBg[p] || '#f5f5f5';
-        const fg = pillarFg[p] || '#666';
-        header = `<div style="display:flex;align-items:center;gap:6px;margin:12px 0 6px;"><span class="pillar-pill" style="background:${bg};color:${fg}">${label}</span></div>`;
-      }
-    }
-    return header + `
+  // Time block grouping
+  const hasTimeBlocks = fs.some(c => c.cat.timeBlock);
+  const tbMeta = {
+    morning: { icon: '🌅', label: 'Morning' },
+    afternoon: { icon: '☀️', label: 'Afternoon' },
+    evening: { icon: '🌙', label: 'Evening' },
+    _anytime: { icon: '📋', label: 'Anytime' }
+  };
+
+  // Auto-detect current block
+  const hour = new Date().getHours();
+  let activeBlock = null;
+  if (hour >= 6 && hour < 12) activeBlock = 'morning';
+  else if (hour >= 12 && hour < 18) activeBlock = 'afternoon';
+  else if (hour >= 18) activeBlock = 'evening';
+
+  function isBlockCollapsed(block) {
+    const key = userPrefix() + 'tb_collapsed_' + block;
+    const saved = localStorage.getItem(key);
+    if (saved !== null) return saved === 'true';
+    // Default: only active block expanded (if today)
+    if (isToday(currentDate) && activeBlock && hasTimeBlocks) return block !== activeBlock;
+    return false;
+  }
+
+  // Build category card template function
+  function catCard(cat, score, max, idx) {
+    return `
     <div class="category" id="cat-${cat.id}">
       <div class="category-header" onclick="toggleCategory('${cat.id}')">
         <div class="category-header-left">
@@ -985,8 +1008,50 @@ function render() {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }
 
+  // Render with or without time blocks
+  if (hasTimeBlocks && !activeFilter) {
+    const blockGroups = { morning: [], afternoon: [], evening: [], _anytime: [] };
+    fs.forEach((cs, idx) => { blockGroups[cs.cat.timeBlock || '_anytime'].push({ ...cs, idx }); });
+
+    let html = '';
+    Object.entries(blockGroups).forEach(([block, items]) => {
+      if (items.length === 0) return;
+      const meta = tbMeta[block];
+      const collapsed = isBlockCollapsed(block);
+      const blockScore = items.reduce((s, c) => s + c.score, 0);
+      const blockMax = items.reduce((s, c) => s + c.max, 0);
+      const isNow = isToday(currentDate) && block === activeBlock;
+
+      html += `<div class="tb-section ${collapsed ? 'collapsed' : ''}" id="tb-${block}">
+        <div class="tb-header" onclick="toggleBlock('${block}')">
+          <div class="tb-header-left">
+            <span class="tb-block-icon">${meta.icon}</span>
+            <span class="tb-block-name">${meta.label}</span>
+            ${isNow ? '<span class="tb-now">Now</span>' : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tb-block-score">${blockScore} / ${blockMax}</span>
+            <span class="tb-toggle">&#9662;</span>
+          </div>
+        </div>
+        <div class="tb-body">`;
+      items.forEach(({ cat, score, max, idx }) => { html += catCard(cat, score, max, idx); });
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+  } else {
+    container.innerHTML = fs.map(({ cat, score, max }, idx) => catCard(cat, score, max, idx)).join('');
+  }
+
+}
+
+function toggleBlock(block) {
+  const el = document.getElementById('tb-' + block);
+  if (!el) return;
+  el.classList.toggle('collapsed');
+  localStorage.setItem(userPrefix() + 'tb_collapsed_' + block, el.classList.contains('collapsed'));
 }
 
 function stepValue(iid, max, delta) {
@@ -1151,13 +1216,15 @@ function addCategory() {
   const icon = document.getElementById('newCatIcon').value.trim() || '📌';
   const color = document.getElementById('newCatColor').value;
   const pillar = document.getElementById('newCatPillar').value || null;
+  const timeBlock = document.getElementById('newCatTimeBlock').value || null;
   if (!name) return;
   const cats = getCategories();
-  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, pillar, items: [] });
+  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, pillar, timeBlock, items: [] });
   saveCategories(cats); closeModal('addCategoryModal');
   document.getElementById('newCatName').value = '';
   document.getElementById('newCatIcon').value = '';
   document.getElementById('newCatPillar').value = '';
+  document.getElementById('newCatTimeBlock').value = '';
   render();
 }
 
@@ -1172,8 +1239,14 @@ function editCategory(catId) {
   const np = prompt('Set pillar (Health / Wealth / Soul / None):', currentPillar);
   if (np === null) return;
   const pv = np.trim();
+  const blocks = ['morning', 'afternoon', 'evening'];
+  const currentBlock = cat.timeBlock || 'anytime';
+  const nb = prompt('Set time block (morning / afternoon / evening / anytime):', currentBlock);
+  if (nb === null) return;
+  const bv = nb.trim().toLowerCase();
   cat.name = nn.trim();
   cat.pillar = pillars.includes(pv) ? pv : null;
+  cat.timeBlock = blocks.includes(bv) ? bv : null;
   saveCategories(cats); render();
 }
 
