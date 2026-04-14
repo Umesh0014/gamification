@@ -133,8 +133,10 @@
     .item-name { font-size: 14px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .item.done .item-name { color: var(--text-muted); text-decoration: line-through; }
     .item-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .item-input { width: 36px; height: 26px; background: #fff; border: 1px solid var(--border); border-radius: 6px; color: var(--text); text-align: center; font-size: 13px; font-weight: 500; outline: none; font-family: inherit; }
-    .item-input:focus { border-color: var(--text); }
+    .item-stepper { display: flex; align-items: center; gap: 2px; }
+    .stepper-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: var(--text); font-size: 16px; cursor: pointer; display: grid; place-items: center; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .stepper-btn:active { background: var(--card); }
+    .stepper-val { width: 28px; text-align: center; font-size: 14px; font-weight: 600; }
     .item-max { font-size: 11px; color: var(--text-muted); }
     .item-delete { width: 22px; height: 22px; background: none; border: none; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; font-size: 13px; opacity: 0; transition: opacity 0.15s; }
     .item:hover .item-delete { opacity: 0.4; }
@@ -221,12 +223,126 @@
     .top-item-name { flex: 1; font-size: 12px; color: var(--text-sec); }
     .top-item-score { font-size: 12px; font-weight: 600; }
 
-    @media (max-width: 640px) {
+    /* Tactile feedback for all interactive elements */
+    button:active, .item-check:active, .score-chip:active, .suggestion-chip:active, .ai-chip:active, .google-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Bottom nav (hidden on desktop) */
+    .bottom-nav { display: none; }
+
+    @media (max-width: 768px) {
+      body { font-size: 16px; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+
+      /* Bottom navigation */
+      .tab-nav { display: none; }
+      .bottom-nav {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: #fff; border-top: 1px solid var(--border);
+        z-index: 200; padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .bottom-nav-btn {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        gap: 2px; padding: 10px 0; background: none; border: none;
+        color: var(--text-muted); font-size: 10px; font-weight: 500;
+        cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      .bottom-nav-btn.active { color: var(--text); }
+      .bottom-nav-btn svg { width: 22px; height: 22px; }
+
+      /* Header */
+      .header-inner { padding: 10px 16px; }
+      .date-nav button { width: 44px; height: 44px; font-size: 20px; }
+      .user-avatar { width: 32px; height: 32px; }
+
+      /* Score ring sticky */
+      .score-bar { position: sticky; top: 49px; z-index: 50; background: #fff; padding: 12px 16px; margin: 0 auto; }
+
+      /* Score ring smaller on mobile */
+      .score-ring-card { padding: 16px 16px 14px; }
+      .score-ring-wrap { width: 100px; height: 100px; }
+      .score-ring-wrap svg { width: 100px; height: 100px; }
+      .score-ring-number { font-size: 28px; }
+      .score-ring-max { font-size: 10px; }
+      .score-ring-label { font-size: 11px; margin-bottom: 10px; }
+
       .score-bar-inner { flex-direction: column; align-items: stretch; }
       .total-score { display: flex; align-items: center; justify-content: space-between; }
-      .dash-grid { grid-template-columns: 1fr; }
-      .checkin-item-name { font-size: 20px; }
-      .checkin-body { padding: 30px 20px; }
+
+      /* Category cards */
+      .container { padding: 0 12px; }
+      .category { margin-bottom: 8px; }
+      .category-header { padding: 14px; min-height: 52px; }
+      .category-title { font-size: 15px; }
+      .category-move { width: 36px; height: 36px; font-size: 12px; }
+      .category-delete { width: 36px; height: 36px; opacity: 0.3 !important; }
+      .category-icon { width: 36px; height: 36px; font-size: 18px; }
+
+      /* Items - larger tap targets */
+      .item { padding: 12px 0; gap: 10px; }
+      .item-check { width: 28px; height: 28px; border-width: 2px; }
+      .item-check.checked::after { font-size: 14px; }
+      .item-name { font-size: 15px; }
+      .item-delete { width: 36px; height: 36px; font-size: 16px; opacity: 0.3 !important; }
+
+      /* Score stepper replaces tiny input */
+      .item-right { gap: 2px; }
+      .item-input { width: 40px; height: 36px; font-size: 16px; border-radius: 8px; }
+      .item-max { font-size: 12px; }
+
+      /* Stepper buttons */
+      .item-stepper {
+        display: flex; align-items: center; gap: 2px;
+      }
+      .stepper-btn {
+        width: 36px; height: 36px; border: 1px solid var(--border);
+        border-radius: 8px; background: #fff; color: var(--text);
+        font-size: 18px; font-weight: 500; cursor: pointer;
+        display: grid; place-items: center; user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .stepper-btn:active { background: var(--card); transform: scale(0.95); }
+      .stepper-val {
+        width: 36px; text-align: center; font-size: 16px; font-weight: 600;
+        color: var(--text);
+      }
+      .stepper-max { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
+
+      /* Add item row */
+      .add-item-row { gap: 6px; padding-top: 10px; }
+      .add-item-row input { height: 44px; font-size: 16px; border-radius: 8px; }
+      .add-item-row input[type="number"] { width: 56px; }
+      .add-item-row button { height: 44px; padding: 0 16px; font-size: 14px; border-radius: 8px; }
+
+      /* Suggestions */
+      .suggestion-chip, .ai-chip { padding: 8px 14px; font-size: 14px; min-height: 36px; }
+      .ai-suggest-btn { padding: 8px 16px; font-size: 12px; min-height: 36px; }
+
+      /* Add category */
+      .add-category-btn { padding: 16px; font-size: 15px; min-height: 52px; }
+
+      /* History */
+      .history-toggle { padding: 14px; font-size: 14px; min-height: 48px; }
+
+      /* Modal full screen on mobile */
+      .modal-overlay { padding: 0; align-items: flex-end; }
+      .modal { max-width: 100%; border-radius: 16px 16px 0 0; padding: 24px 20px calc(20px + env(safe-area-inset-bottom, 0px)); }
+      .modal input, .modal select { height: 44px; font-size: 16px; }
+      .modal-actions button { padding: 12px 20px; font-size: 15px; min-height: 48px; }
+
+      /* Dashboard */
+      .dash-grid { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+      .dash-card { padding: 12px; }
+      .dash-card-value { font-size: 22px; }
+      .backdate-banner { padding: 0 12px; }
+
+      /* Score chips */
+      .score-chips { padding: 0 12px; gap: 6px; }
+      .score-chip { padding: 8px; min-height: 48px; }
+
+      /* Pillar cards */
+      .pillar-cards { padding: 0 12px; }
     }
   </style>
 </head>
@@ -349,6 +465,18 @@
   </div>
 </div>
 
+</div>
+
+<!-- Bottom Nav (mobile only) -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="bottom-nav-btn active" onclick="switchTabMobile('tracker')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+    Tracker
+  </button>
+  <button class="bottom-nav-btn" onclick="switchTabMobile('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="4"/><rect x="14" y="10" width="7" height="7"/><rect x="3" y="13" width="7" height="4"/></svg>
+    Dashboard
+  </button>
 </div>
 
 <div class="modal-overlay" id="addCategoryModal">
@@ -727,7 +855,11 @@ function render() {
                 <div class="item-name">${item.name}</div>
               </div>
               <div class="item-right">
-                <input class="item-input" type="number" min="0" max="${item.points}" value="${val}" onchange="updateValue('${item.id}',this.value,${item.points})" style="${done?'border-color:var(--green);color:var(--green)':''}">
+                <div class="item-stepper">
+                  <button class="stepper-btn" onclick="stepValue('${item.id}',${item.points},-1)">-</button>
+                  <span class="stepper-val" style="${done?'color:var(--green)':''}">${val}</span>
+                  <button class="stepper-btn" onclick="stepValue('${item.id}',${item.points},1)">+</button>
+                </div>
                 <span class="item-max">/ ${item.points}</span>
                 <button class="item-delete" onclick="editItem('${cat.id}','${item.id}')" title="Edit" style="opacity:0.4"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
                 <button class="item-delete" onclick="deleteItem('${cat.id}','${item.id}')">&times;</button>
@@ -756,13 +888,35 @@ function render() {
         })()}
         <div class="add-item-row">
           <input type="text" placeholder="Add new item..." id="newItem-${cat.id}">
-          <input type="number" placeholder="Score" min="1" max="20" value="" id="newPts-${cat.id}">
+          <input type="number" inputmode="numeric" placeholder="Score" min="1" max="20" value="" id="newPts-${cat.id}">
           <button onclick="addItem('${cat.id}')">Add</button>
         </div>
       </div>
     </div>`;
   }).join('');
 
+}
+
+function stepValue(iid, max, delta) {
+  const dd = getDayData(currentDate);
+  const current = dd[iid] || 0;
+  dd[iid] = Math.max(0, Math.min(max, current + delta));
+  saveDayData(currentDate, dd); render();
+}
+
+function switchTabMobile(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  // Activate correct bottom nav button
+  const btns = document.querySelectorAll('.bottom-nav-btn');
+  if (tab === 'tracker') btns[0].classList.add('active');
+  else btns[1].classList.add('active');
+  // Also activate top tab if visible
+  const topBtns = document.querySelectorAll('.tab-btn');
+  topBtns.forEach(b => { if (b.textContent.trim().toLowerCase() === tab) b.classList.add('active'); });
+  if (tab === 'dashboard') renderDashboard();
 }
 
 function toggleFilter(id) { activeFilter = activeFilter === id ? null : id; render(); }
