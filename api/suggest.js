@@ -31,11 +31,11 @@ export default async function handler(req) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are a daily habit tracking app assistant. The user created a habit category called "${category}". Suggest exactly 10 short daily trackable habits or tasks for this category. Each item must be under 6 words. Return ONLY a valid JSON array of strings with no extra text, markdown, or explanation. Example format: ["Item one","Item two","Item three"]`
+              text: `List 10 daily habits for someone improving their "${category}" life area. Return a JSON array of short strings (max 5 words each). No explanation, just the array. Example: ["Read 20 minutes","Exercise daily","Drink more water"]`
             }]
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.8,
             maxOutputTokens: 500
           }
         })
@@ -48,11 +48,28 @@ export default async function handler(req) {
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Handle thinking model - check all parts for text content
+    let text = '';
+    const candidate = data.candidates?.[0];
+    if (candidate?.content?.parts) {
+      for (const part of candidate.content.parts) {
+        if (part.text) {
+          text += part.text;
+        }
+      }
+    }
+
+    if (!text) {
+      return new Response(JSON.stringify({ suggestions: [], raw: data }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
 
     // Extract JSON array from response (handle markdown code blocks)
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const match = cleaned.match(/\[[\s\S]*\]/);
+    const match = cleaned.match(/\[[\s\S]*?\]/);
     let suggestions = [];
 
     if (match) {
