@@ -72,6 +72,15 @@
     .score-ring-cat { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
     .score-ring-cat span { font-weight: 600; color: var(--text-sec); }
 
+    .pillar-cards { max-width: 640px; margin: 10px auto 0; padding: 0 20px; display: flex; gap: 6px; }
+    .pillar-card { flex: 1; background: var(--card); border-radius: var(--r); padding: 10px 12px; text-align: center; }
+    .pillar-card-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+    .pillar-card-score { font-size: 18px; font-weight: 700; }
+    .pillar-card-max { font-size: 11px; color: var(--text-muted); }
+
+    .pillar-header { max-width: 640px; margin: 14px auto 4px; padding: 0 20px; display: flex; align-items: center; gap: 6px; }
+    .pillar-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
+
     .score-chips { max-width: 640px; margin: 8px auto 0; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 4px; }
     .score-chip { background: var(--card); border-radius: 8px; padding: 6px 8px; text-align: center; cursor: pointer; transition: all 0.15s; min-width: 64px; flex: 1; }
     .score-chip:hover, .score-chip.active { background: var(--primary-bg); }
@@ -294,7 +303,10 @@
   <div class="container" style="margin-top:20px;">
     <div class="dash-grid" id="dashKPIs"></div>
     <div class="chart-container">
-      <div class="chart-title">Daily Scores - Last 14 Days</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="chart-title" style="margin-bottom:0">Daily Scores - Last 14 Days</div>
+        <div id="chartToggle"></div>
+      </div>
       <div class="bar-chart" id="dashBarChart"></div>
     </div>
     <div class="chart-container">
@@ -323,6 +335,13 @@
     <input id="newCatName" type="text" placeholder="e.g. Fitness">
     <label>Icon (emoji)</label>
     <input id="newCatIcon" type="text" placeholder="e.g. 💪" maxlength="2">
+    <label>Pillar (optional)</label>
+    <select id="newCatPillar" style="width:100%;height:36px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
+      <option value="">None</option>
+      <option value="Health">Health</option>
+      <option value="Wealth">Wealth</option>
+      <option value="Soul">Soul</option>
+    </select>
     <label>Color</label>
     <input id="newCatColor" type="color" value="#2563eb" style="height:40px;padding:4px;cursor:pointer;">
     <div class="modal-actions">
@@ -558,11 +577,29 @@ function render() {
   labelEl.textContent = labelText;
   labelEl.style.color = ringColor;
 
+  // Pillar scores
+  const pillarColors = { Health: '#22c55e', Wealth: '#eab308', Soul: '#a78bfa' };
+  const hasPillars = catScores.some(c => c.cat.pillar);
+  const pillarScores = {};
+  if (hasPillars) {
+    ['Health', 'Wealth', 'Soul'].forEach(p => {
+      let s = 0, m = 0;
+      catScores.filter(c => c.cat.pillar === p).forEach(c => { s += c.score; m += c.max; });
+      if (m > 0) pillarScores[p] = { score: s, max: m };
+    });
+  }
+
   // Category breakdown (inline)
   const breakdownEl = document.getElementById('scoreBreakdown');
-  breakdownEl.innerHTML = catScores.filter(c => c.max > 0).map(({ cat, score }) =>
-    `<div class="score-ring-cat">${cat.icon} ${cat.name} <span>${score}</span></div>`
-  ).join('');
+  if (hasPillars && Object.keys(pillarScores).length > 0) {
+    breakdownEl.innerHTML = Object.entries(pillarScores).map(([p, v]) =>
+      `<div class="score-ring-cat" style="color:${pillarColors[p]}">${p} <span>${v.score}</span><span style="color:var(--text-muted)">/${v.max}</span></div>`
+    ).join('');
+  } else {
+    breakdownEl.innerHTML = catScores.filter(c => c.max > 0).map(({ cat, score }) =>
+      `<div class="score-ring-cat">${cat.icon} ${cat.name} <span>${score}</span></div>`
+    ).join('');
+  }
 
   // Category chips (clickable filter)
   document.getElementById('scoreChips').innerHTML = catScores.map(({ cat, score, max }) => `
@@ -575,18 +612,46 @@ function render() {
   const fs = activeFilter ? catScores.filter(c => c.cat.id === activeFilter) : catScores;
   const tc = fs.length;
 
-  container.innerHTML = fs.map(({ cat, score, max }, idx) => `
+  // Sort by pillar groups if pillars exist
+  let orderedFs = fs;
+  if (hasPillars && !activeFilter) {
+    const pillarOrder = ['Health', 'Wealth', 'Soul', null];
+    orderedFs = [...fs].sort((a, b) => {
+      const ai = pillarOrder.indexOf(a.cat.pillar || null);
+      const bi = pillarOrder.indexOf(b.cat.pillar || null);
+      return ai - bi;
+    });
+  }
+
+  let lastPillar = '__none__';
+  const pillarBg = { Health: '#f0fdf4', Wealth: '#fefce8', Soul: '#f5f3ff' };
+  const pillarFg = { Health: '#16a34a', Wealth: '#ca8a04', Soul: '#7c3aed' };
+
+  container.innerHTML = orderedFs.map(({ cat, score, max }, idx) => {
+    let header = '';
+    if (hasPillars && !activeFilter) {
+      const p = cat.pillar || null;
+      if (p !== lastPillar) {
+        lastPillar = p;
+        const label = p || 'Other';
+        const bg = pillarBg[p] || '#f5f5f5';
+        const fg = pillarFg[p] || '#666';
+        header = `<div style="display:flex;align-items:center;gap:6px;margin:12px 0 6px;"><span class="pillar-pill" style="background:${bg};color:${fg}">${label}</span></div>`;
+      }
+    }
+    return header + `
     <div class="category" id="cat-${cat.id}">
       <div class="category-header" onclick="toggleCategory('${cat.id}')">
         <div class="category-header-left">
           <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',-1)" ${idx===0?'disabled':''}>&#9650;</button>
           <button class="category-move" onclick="event.stopPropagation();moveCategory('${cat.id}',1)" ${idx===tc-1?'disabled':''}>&#9660;</button>
           <div class="category-icon" style="background:${cat.color}15;color:${cat.color}">${cat.icon}</div>
-          <div class="category-title">${cat.name}</div>
+          <div class="category-title">${cat.name}</div>${cat.pillar ? `<span style="font-size:9px;padding:2px 6px;border-radius:10px;background:${pillarBg[cat.pillar]||'#f5f5f5'};color:${pillarFg[cat.pillar]||'#666'};font-weight:600">${cat.pillar}</span>` : ''}
         </div>
         <div class="category-score-badge">
           <div class="category-score">${score} / ${max}</div>
           <span class="category-toggle">&#9662;</span>
+          <button class="category-delete" onclick="event.stopPropagation();editCategory('${cat.id}')" title="Edit category"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
           <button class="category-delete" onclick="event.stopPropagation();deleteCategory('${cat.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
         </div>
       </div>
@@ -632,7 +697,8 @@ function render() {
           <button onclick="addItem('${cat.id}')">Add</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
 }
 
@@ -775,13 +841,31 @@ function addCategory() {
   const name = document.getElementById('newCatName').value.trim();
   const icon = document.getElementById('newCatIcon').value.trim() || '📌';
   const color = document.getElementById('newCatColor').value;
+  const pillar = document.getElementById('newCatPillar').value || null;
   if (!name) return;
   const cats = getCategories();
-  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, items: [] });
+  cats.push({ id: name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(), name, icon, color, pillar, items: [] });
   saveCategories(cats); closeModal('addCategoryModal');
   document.getElementById('newCatName').value = '';
   document.getElementById('newCatIcon').value = '';
+  document.getElementById('newCatPillar').value = '';
   render();
+}
+
+function editCategory(catId) {
+  const cats = getCategories(), cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  const nn = prompt('Edit category name:', cat.name);
+  if (nn === null) return;
+  if (!nn.trim()) { alert('Name cannot be empty'); return; }
+  const pillars = ['Health', 'Wealth', 'Soul'];
+  const currentPillar = cat.pillar || 'None';
+  const np = prompt('Set pillar (Health / Wealth / Soul / None):', currentPillar);
+  if (np === null) return;
+  const pv = np.trim();
+  cat.name = nn.trim();
+  cat.pillar = pillars.includes(pv) ? pv : null;
+  saveCategories(cats); render();
 }
 
 function toggleHistory() {
@@ -836,19 +920,67 @@ function renderDashboard() {
 
   const trend = v => v > 0.01 ? `<div class="dash-card-trend trend-up">&#9650; ${Math.round(v*100)}%</div>` : v < -0.01 ? `<div class="dash-card-trend trend-down">&#9660; ${Math.round(Math.abs(v)*100)}%</div>` : `<div class="dash-card-trend trend-same">&#8212; Same</div>`;
 
+  // Pillar scores for dashboard
+  const dPillarColors = { Health: '#22c55e', Wealth: '#eab308', Soul: '#a78bfa' };
+  const dHasPillars = cats.some(c => c.pillar);
+  let pillarCardsHtml = '';
+  if (dHasPillars) {
+    ['Health', 'Wealth', 'Soul'].forEach(p => {
+      let s = 0, m = 0;
+      cats.filter(c => c.pillar === p).forEach(c => {
+        s += getCategoryScore(c, today.dayData);
+        m += getCategoryMax(c);
+      });
+      if (m > 0) {
+        pillarCardsHtml += `<div class="dash-card"><div class="dash-card-label" style="color:${dPillarColors[p]}">${p}</div><div class="dash-card-value">${s}</div><div class="dash-card-sub">of ${m}</div></div>`;
+      }
+    });
+  }
+
   document.getElementById('dashKPIs').innerHTML = `
     <div class="dash-card"><div class="dash-card-label">Today</div><div class="dash-card-value" style="color:${today.pct>=0.8?'var(--green)':today.pct>=0.5?'var(--amber)':'var(--primary)'}">${today.total}</div><div class="dash-card-sub">of ${today.max}</div></div>
     <div class="dash-card"><div class="dash-card-label">Weekly Avg</div><div class="dash-card-value" style="color:var(--primary)">${Math.round(twa*100)}%</div>${trend(wt)}</div>
-    <div class="dash-card"><div class="dash-card-label">Streak</div><div class="dash-card-value" style="color:var(--amber)">${streak}</div><div class="dash-card-sub">day${streak!==1?'s':''}</div></div>`;
+    <div class="dash-card"><div class="dash-card-label">Streak</div><div class="dash-card-value" style="color:var(--amber)">${streak}</div><div class="dash-card-sub">day${streak!==1?'s':''}</div></div>
+    ${pillarCardsHtml}`;
 
   const l14 = dd.slice(0, 14).reverse();
-  const ms = Math.max(...l14.map(d => d.total), 1);
   const dn = ['S','M','T','W','T','F','S'];
-  document.getElementById('dashBarChart').innerHTML = l14.map(d => {
-    const h = Math.max(2, (d.total / ms) * 130);
-    const c = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--primary)' : 'var(--border)';
-    return `<div class="bar-col"><div class="bar-value">${d.total}</div><div class="bar" style="height:${h}px;background:${c}"></div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
-  }).join('');
+
+  // Chart toggle
+  const toggleEl = document.getElementById('chartToggle');
+  if (dHasPillars) {
+    toggleEl.innerHTML = `<button onclick="toggleChartView()" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;color:var(--text-sec)" id="chartViewBtn">${window._chartByPillar ? 'Show Total' : 'By Pillar'}</button>`;
+  } else {
+    toggleEl.innerHTML = '';
+  }
+
+  if (window._chartByPillar && dHasPillars) {
+    // Stacked pillar bars
+    const pillarsUsed = ['Health', 'Wealth', 'Soul'].filter(p => cats.some(c => c.pillar === p));
+    const maxPillarTotal = Math.max(...l14.map(d => {
+      let t = 0;
+      pillarsUsed.forEach(p => cats.filter(c => c.pillar === p).forEach(c => t += getCategoryScore(c, d.dayData)));
+      return t;
+    }), 1);
+
+    document.getElementById('dashBarChart').innerHTML = l14.map(d => {
+      let bars = '';
+      pillarsUsed.forEach(p => {
+        let ps = 0;
+        cats.filter(c => c.pillar === p).forEach(c => ps += getCategoryScore(c, d.dayData));
+        const h = Math.max(0, (ps / maxPillarTotal) * 120);
+        bars += `<div style="width:100%;max-width:24px;height:${h}px;background:${dPillarColors[p]};border-radius:2px;min-height:${ps>0?2:0}px" title="${p}: ${ps}"></div>`;
+      });
+      return `<div class="bar-col"><div style="display:flex;flex-direction:column;gap:1px;align-items:center;justify-content:flex-end;height:100%">${bars}</div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
+    }).join('');
+  } else {
+    const ms = Math.max(...l14.map(d => d.total), 1);
+    document.getElementById('dashBarChart').innerHTML = l14.map(d => {
+      const h = Math.max(2, (d.total / ms) * 130);
+      const c = d.pct >= 0.8 ? 'var(--green)' : d.pct >= 0.5 ? 'var(--amber)' : d.total > 0 ? 'var(--primary)' : 'var(--border)';
+      return `<div class="bar-col"><div class="bar-value">${d.total}</div><div class="bar" style="height:${h}px;background:${c}"></div><div class="bar-label">${dn[d.date.getDay()]}</div></div>`;
+    }).join('');
+  }
 
   const ca = cats.map(c => {
     let ts = 0, tm = 0;
@@ -863,13 +995,21 @@ function renderDashboard() {
   cats.forEach(c => c.items.forEach(item => {
     let done = 0;
     tw.forEach(d => { if ((d.dayData[item.id] || 0) >= item.points) done++; });
-    is.push({ name: item.name, icon: c.icon, completed: done, pct: done / 7 });
+    is.push({ name: item.name, icon: c.icon, pillar: c.pillar || null, completed: done, pct: done / 7 });
   }));
 
-  const sorted = [...is].sort((a, b) => b.pct - a.pct);
-  document.getElementById('dashTopItems').innerHTML = sorted.slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}</div><div class="top-item-score" style="color:var(--green)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
+  const pillarTag = (p) => p ? `<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:${dPillarColors[p]||'#eee'}20;color:${dPillarColors[p]||'#999'};font-weight:600;margin-left:4px">${p}</span>` : '';
 
-  document.getElementById('dashBottomItems').innerHTML = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}</div><div class="top-item-score" style="color:var(--red)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
+  const sorted = [...is].sort((a, b) => b.pct - a.pct);
+  document.getElementById('dashTopItems').innerHTML = sorted.slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}${pillarTag(it.pillar)}</div><div class="top-item-score" style="color:var(--green)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
+
+  document.getElementById('dashBottomItems').innerHTML = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}${pillarTag(it.pillar)}</div><div class="top-item-score" style="color:var(--red)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
+}
+
+window._chartByPillar = false;
+function toggleChartView() {
+  window._chartByPillar = !window._chartByPillar;
+  renderDashboard();
 }
 
 document.getElementById('addCategoryModal').addEventListener('click', function(e) { if (e.target === this) closeModal('addCategoryModal'); });
