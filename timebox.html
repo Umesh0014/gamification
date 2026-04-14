@@ -1006,11 +1006,17 @@ async function aiSuggest(catId, catName) {
       const cat = cats.find(c => c.id === catId);
       const existing = cat ? cat.items.map(i => i.name.toLowerCase()) : [];
       const filtered = data.suggestions.filter(s => !existing.includes(s.toLowerCase()));
-      container.innerHTML = filtered.map(s =>
-        `<button class="ai-chip" onclick="addSuggestion('${catId}','${s.replace(/'/g, "\\'")}')">${s}</button>`
-      ).join('');
+      if (filtered.length > 0) {
+        container.innerHTML = filtered.map(s =>
+          `<button class="ai-chip" onclick="addSuggestion('${catId}','${s.replace(/'/g, "\\'")}')">${s}</button>`
+        ).join('');
+      } else {
+        container.innerHTML = '<span style="font-size:11px;color:var(--green)">All suggestions already added!</span>';
+      }
+    } else if (data.error) {
+      container.innerHTML = '<span style="font-size:11px;color:var(--red)">' + data.error + '</span>';
     } else {
-      container.innerHTML = '<span style="font-size:11px;color:var(--text-muted)">No suggestions found</span>';
+      container.innerHTML = '<span style="font-size:11px;color:var(--text-muted)">No suggestions found. Try again.</span>';
     }
   } catch (e) {
     container.innerHTML = '<span style="font-size:11px;color:var(--red)">Failed to get suggestions. Check API key.</span>';
