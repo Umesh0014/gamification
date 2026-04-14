@@ -223,6 +223,42 @@
     .top-item-name { flex: 1; font-size: 12px; color: var(--text-sec); }
     .top-item-score { font-size: 12px; font-weight: 600; }
 
+    /* Heatmap */
+    .heatmap-container { position: relative; }
+    .heatmap-toggle { display: flex; gap: 2px; background: var(--card); border-radius: 6px; padding: 2px; }
+    .heatmap-toggle-btn { padding: 4px 10px; border: none; background: none; border-radius: 4px; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: inherit; }
+    .heatmap-toggle-btn.active { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+    .heatmap-filters { display: flex; gap: 4px; margin-bottom: 10px; }
+    .heatmap-filter { padding: 4px 10px; border: 1px solid var(--border); background: #fff; border-radius: 20px; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: inherit; }
+    .heatmap-filter.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+    .heatmap-grid-wrap { display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .heatmap-labels { display: flex; flex-direction: column; gap: 3px; padding-right: 6px; padding-top: 18px; }
+    .heatmap-day-label { height: 14px; font-size: 9px; color: var(--text-muted); display: flex; align-items: center; font-weight: 500; }
+    .heatmap-grid { display: flex; gap: 3px; }
+    .heatmap-week { display: flex; flex-direction: column; gap: 3px; }
+    .heatmap-month { font-size: 9px; color: var(--text-muted); font-weight: 500; height: 15px; white-space: nowrap; }
+    .heatmap-cell { width: 14px; height: 14px; border-radius: 3px; cursor: pointer; position: relative; }
+    .heatmap-cell.today { box-shadow: 0 0 0 1.5px var(--text); }
+    .heatmap-cell:hover { opacity: 0.8; }
+
+    .heatmap-tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; white-space: nowrap; z-index: 10; pointer-events: none; line-height: 1.4; }
+    .heatmap-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--text); }
+
+    .heatmap-insights { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+    .heatmap-insight { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+    .heatmap-insight svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--amber); }
+
+    @media (max-width: 768px) {
+      .heatmap-cell { width: 11px; height: 11px; border-radius: 2px; }
+      .heatmap-day-label { height: 11px; font-size: 8px; }
+      .heatmap-month { font-size: 8px; height: 13px; }
+      .heatmap-labels { padding-top: 15px; gap: 3px; }
+      .heatmap-grid { gap: 3px; }
+      .heatmap-week { gap: 3px; }
+    }
+
     /* Tactile feedback for all interactive elements */
     button:active, .item-check:active, .score-chip:active, .suggestion-chip:active, .ai-chip:active, .google-btn:active {
       transform: scale(0.97);
@@ -442,11 +478,24 @@
   <div class="container" style="margin-top:20px;">
     <div class="dash-grid" id="dashKPIs"></div>
     <div class="chart-container">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="chart-title" style="margin-bottom:0">Daily Scores - Last 14 Days</div>
-        <div id="chartToggle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="chart-title" style="margin-bottom:0">Activity</div>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <div id="chartToggle"></div>
+          <div class="heatmap-toggle">
+            <button class="heatmap-toggle-btn active" onclick="setChartMode('heatmap')">Heatmap</button>
+            <button class="heatmap-toggle-btn" onclick="setChartMode('bars')">Bar chart</button>
+          </div>
+        </div>
       </div>
-      <div class="bar-chart" id="dashBarChart"></div>
+      <div id="heatmapSection">
+        <div class="heatmap-filters" id="heatmapFilters"></div>
+        <div class="heatmap-container">
+          <div class="heatmap-grid-wrap" id="heatmapGrid"></div>
+        </div>
+        <div class="heatmap-insights" id="heatmapInsights"></div>
+      </div>
+      <div class="bar-chart" id="dashBarChart" style="display:none"></div>
     </div>
     <div class="chart-container">
       <div class="chart-title">Category Performance (7-Day Avg)</div>
@@ -1221,12 +1270,198 @@ function renderDashboard() {
   document.getElementById('dashTopItems').innerHTML = sorted.slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}${pillarTag(it.pillar)}</div><div class="top-item-score" style="color:var(--green)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
 
   document.getElementById('dashBottomItems').innerHTML = sorted.filter(i => i.pct < 1).sort((a, b) => a.pct - b.pct).slice(0, 5).map((it, i) => `<div class="top-item-row"><div class="top-item-rank" style="background:var(--red-bg);color:var(--red)">${i+1}</div><div class="top-item-name">${it.icon} ${it.name}${pillarTag(it.pillar)}</div><div class="top-item-score" style="color:var(--red)">${it.completed}/7</div></div>`).join('') || '<div style="color:var(--text-muted);font-size:11px;padding:10px">No data</div>';
+
+  // Render heatmap if active
+  if (window._chartMode === 'heatmap') renderHeatmap();
 }
 
 window._chartByPillar = false;
+window._chartMode = 'heatmap';
+window._heatmapPillar = null;
+
 function toggleChartView() {
   window._chartByPillar = !window._chartByPillar;
   renderDashboard();
+}
+
+function setChartMode(mode) {
+  window._chartMode = mode;
+  document.querySelectorAll('.heatmap-toggle-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('heatmapSection').style.display = mode === 'heatmap' ? 'block' : 'none';
+  document.getElementById('dashBarChart').style.display = mode === 'bars' ? 'flex' : 'none';
+  if (mode === 'heatmap') renderHeatmap();
+}
+
+function setHeatmapPillar(p) {
+  window._heatmapPillar = p;
+  document.querySelectorAll('.heatmap-filter').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderHeatmap();
+}
+
+function getScoreLabel(score) {
+  if (score >= 85) return 'Exceptional';
+  if (score >= 70) return 'Strong day';
+  if (score >= 41) return 'Building momentum';
+  if (score > 0) return 'Keep going';
+  return 'No entry';
+}
+
+function getHeatmapColor(score, hasData) {
+  if (!hasData) return '#e5e7eb';
+  if (score >= 85) return '#4ade80';
+  if (score >= 70) return '#60a5fa';
+  if (score >= 41) return '#fcd34d';
+  return '#fca5a5';
+}
+
+function renderHeatmap() {
+  const cats = getCategories();
+  const hasPillars = cats.some(c => c.pillar);
+  const pillar = window._heatmapPillar;
+
+  // Filters
+  const filtersEl = document.getElementById('heatmapFilters');
+  if (hasPillars) {
+    const pills = [{ label: 'All', val: null }, { label: 'Health', val: 'Health' }, { label: 'Wealth', val: 'Wealth' }, { label: 'Soul', val: 'Soul' }];
+    filtersEl.innerHTML = pills.map(p =>
+      `<button class="heatmap-filter ${pillar === p.val ? 'active' : ''}" onclick="setHeatmapPillar(${p.val ? "'" + p.val + "'" : 'null'})">${p.label}</button>`
+    ).join('');
+  } else {
+    filtersEl.innerHTML = '';
+  }
+
+  // Build 12-week grid (84 days), Mon-Sun rows
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayKey = dateKey(today);
+
+  // Find the Monday of 12 weeks ago
+  const start = new Date(today);
+  start.setDate(start.getDate() - start.getDay() + 1); // this week's Monday
+  start.setDate(start.getDate() - 11 * 7); // 12 weeks back
+
+  // Gather all 84 days of data
+  const dayScores = {};
+  for (let i = 0; i < 84; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    const dk = dateKey(d);
+    const dd = getDayData(d);
+    let score = 0, max = 0;
+    const filteredCats = pillar ? cats.filter(c => c.pillar === pillar) : cats;
+    filteredCats.forEach(c => {
+      score += getCategoryScore(c, dd);
+      max += getCategoryMax(c);
+    });
+    const pct = max > 0 ? Math.round((score / max) * 100) : 0;
+    const hasData = score > 0 || Object.keys(dd).length > 0;
+    dayScores[dk] = { date: d, score, max, pct, hasData, dayOfWeek: d.getDay() };
+  }
+
+  // Build weeks
+  const weeks = [];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let currentDay = new Date(start);
+
+  for (let w = 0; w < 12; w++) {
+    const week = { days: [], monthLabel: '' };
+    for (let d = 0; d < 7; d++) {
+      const dk = dateKey(currentDay);
+      const data = dayScores[dk] || { date: new Date(currentDay), pct: 0, hasData: false, score: 0, max: 0 };
+      const isFuture = currentDay > today;
+
+      // Month label: show if this is the 1st of month or first day of this week's month differs from last
+      if (d === 0) {
+        if (w === 0 || currentDay.getMonth() !== new Date(currentDay.getTime() - 7 * 86400000).getMonth()) {
+          week.monthLabel = months[currentDay.getMonth()];
+        }
+      }
+
+      week.days.push({
+        dk,
+        date: new Date(currentDay),
+        pct: data.pct,
+        score: data.score,
+        max: data.max,
+        hasData: data.hasData && !isFuture,
+        isFuture,
+        isToday: dk === todayKey
+      });
+      currentDay.setDate(currentDay.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+
+  // Render
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  let html = '<div class="heatmap-labels">';
+  dayLabels.forEach(l => html += `<div class="heatmap-day-label">${l}</div>`);
+  html += '</div><div class="heatmap-grid">';
+
+  weeks.forEach(week => {
+    html += '<div class="heatmap-week">';
+    html += `<div class="heatmap-month">${week.monthLabel}</div>`;
+    week.days.forEach(day => {
+      if (day.isFuture) {
+        html += `<div class="heatmap-cell" style="background:transparent"></div>`;
+      } else {
+        const color = getHeatmapColor(day.pct, day.hasData);
+        const label = day.hasData ? getScoreLabel(day.pct) : 'No entry';
+        const tipText = `${formatDate(day.date)} &middot; ${day.hasData ? 'Score: ' + day.score : 'No entry'}${day.hasData ? ' &middot; ' + label : ''}`;
+        html += `<div class="heatmap-cell ${day.isToday ? 'today' : ''}" style="background:${color}" onclick="showHeatmapTip(event, this)" data-tip="${tipText.replace(/"/g, '&quot;')}"></div>`;
+      }
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById('heatmapGrid').innerHTML = html;
+
+  // Insights
+  const insightsEl = document.getElementById('heatmapInsights');
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayTotals = [0,0,0,0,0,0,0];
+  const dayCounts = [0,0,0,0,0,0,0];
+  Object.values(dayScores).forEach(d => {
+    if (d.hasData && d.date <= today) {
+      dayTotals[d.dayOfWeek] += d.pct;
+      dayCounts[d.dayOfWeek]++;
+    }
+  });
+
+  const dayAvgs = dayTotals.map((t, i) => ({ day: dayNames[i], avg: dayCounts[i] > 0 ? Math.round(t / dayCounts[i]) : null })).filter(d => d.avg !== null);
+  const totalWeeks = Math.ceil(Object.values(dayScores).filter(d => d.hasData).length / 7);
+
+  if (dayAvgs.length >= 4 && totalWeeks >= 4) {
+    const sorted = [...dayAvgs].sort((a, b) => b.avg - a.avg);
+    const best = sorted[0];
+    const worst = sorted[sorted.length - 1];
+    const bulb = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>';
+    insightsEl.innerHTML = `
+      <div class="heatmap-insight">${bulb} You score highest on <b>${best.day}s</b> (avg ${best.avg})</div>
+      <div class="heatmap-insight">${bulb} <b>${worst.day}</b> is your weakest day (avg ${worst.avg})</div>
+    `;
+  } else {
+    insightsEl.innerHTML = '';
+  }
+}
+
+let _activeTip = null;
+function showHeatmapTip(e, el) {
+  e.stopPropagation();
+  // Remove existing
+  if (_activeTip) { _activeTip.remove(); _activeTip = null; }
+  const tip = document.createElement('div');
+  tip.className = 'heatmap-tooltip';
+  tip.innerHTML = el.dataset.tip;
+  el.style.position = 'relative';
+  el.appendChild(tip);
+  _activeTip = tip;
+  setTimeout(() => {
+    document.addEventListener('click', function rm() { if (_activeTip) { _activeTip.remove(); _activeTip = null; } document.removeEventListener('click', rm); }, { once: true });
+  }, 10);
 }
 
 document.getElementById('addCategoryModal').addEventListener('click', function(e) { if (e.target === this) closeModal('addCategoryModal'); });
