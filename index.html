@@ -59,15 +59,21 @@
     .tab-content.active { display: block; }
 
     .score-bar { max-width: 640px; margin: 20px auto 0; padding: 0 20px; }
-    .score-bar-inner { background: var(--card); border-radius: var(--r); padding: 20px; display: flex; align-items: center; gap: 20px; }
-    .total-score { text-align: center; min-width: 70px; }
-    .total-score .number { font-size: 32px; font-weight: 700; line-height: 1; }
-    .total-score .max { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .progress-ring { position: relative; width: 72px; height: 72px; }
-    .progress-ring svg { transform: rotate(-90deg); }
-    .progress-ring .progress-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .score-breakdown { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; }
-    .score-chip { background: #fff; border-radius: 8px; padding: 6px 8px; text-align: center; cursor: pointer; transition: all 0.15s; min-width: 64px; flex: 1; }
+    .score-ring-card { background: var(--card); border-radius: var(--r); padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: center; }
+    .score-ring-wrap { position: relative; width: 140px; height: 140px; margin-bottom: 4px; }
+    .score-ring-wrap svg { transform: rotate(-90deg); width: 140px; height: 140px; }
+    .score-ring-bg { fill: none; stroke: var(--border-light); stroke-width: 8; }
+    .score-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1), stroke 0.4s; }
+    .score-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-ring-number { font-size: 40px; font-weight: 700; line-height: 1; transition: color 0.4s; }
+    .score-ring-max { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .score-ring-label { font-size: 12px; font-weight: 500; margin-top: 2px; margin-bottom: 16px; transition: color 0.4s; }
+    .score-ring-breakdown { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; }
+    .score-ring-cat { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .score-ring-cat span { font-weight: 600; color: var(--text-sec); }
+
+    .score-chips { max-width: 640px; margin: 8px auto 0; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .score-chip { background: var(--card); border-radius: 8px; padding: 6px 8px; text-align: center; cursor: pointer; transition: all 0.15s; min-width: 64px; flex: 1; }
     .score-chip:hover, .score-chip.active { background: var(--primary-bg); }
     .chip-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-muted); margin-bottom: 1px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chip-score { font-size: 14px; font-weight: 600; color: var(--text); }
@@ -346,22 +352,22 @@
 <div class="tab-content active" id="tab-tracker">
 
 <div class="score-bar">
-  <div class="score-bar-inner">
-    <div class="total-score">
-      <div class="progress-ring">
-        <svg width="90" height="90">
-          <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border-light)" stroke-width="6"/>
-          <circle id="progressCircle" cx="45" cy="45" r="38" fill="none" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
-        </svg>
-        <div class="progress-text">
-          <div class="number" id="totalScore">0</div>
-          <div class="max" id="totalMax">/ 0</div>
-        </div>
+  <div class="score-ring-card">
+    <div class="score-ring-wrap">
+      <svg viewBox="0 0 140 140">
+        <circle class="score-ring-bg" cx="70" cy="70" r="60"/>
+        <circle class="score-ring-fill" id="progressCircle" cx="70" cy="70" r="60" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
+      </svg>
+      <div class="score-ring-center">
+        <div class="score-ring-number" id="totalScore">0</div>
+        <div class="score-ring-max" id="totalMax">/ 100</div>
       </div>
     </div>
-    <div class="score-breakdown" id="scoreBreakdown"></div>
+    <div class="score-ring-label" id="scoreLabel">Keep going</div>
+    <div class="score-ring-breakdown" id="scoreBreakdown"></div>
   </div>
 </div>
+<div class="score-chips" id="scoreChips"></div>
 
 <div class="container" id="checkinContainer"></div>
 
@@ -637,15 +643,39 @@ function render() {
   document.getElementById('totalScore').textContent = totalScore;
   document.getElementById('totalMax').textContent = `/ 100`;
 
+  // Score ring
   const circle = document.getElementById('progressCircle');
-  const circ = 2 * Math.PI * 38;
+  const circ = 2 * Math.PI * 60;
   const pct = totalScore / 100;
-  circle.style.strokeDashoffset = circ * (1 - pct);
-  const sc = pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : pct > 0 ? 'var(--primary)' : 'var(--text-muted)';
-  circle.style.stroke = sc;
-  document.getElementById('totalScore').style.color = sc;
 
-  document.getElementById('scoreBreakdown').innerHTML = catScores.map(({ cat, score, max }) => `
+  // Color by range
+  let ringColor, labelText;
+  if (totalScore >= 85) { ringColor = '#22c55e'; labelText = 'Exceptional'; }
+  else if (totalScore >= 70) { ringColor = '#111'; labelText = 'Strong day'; }
+  else if (totalScore >= 41) { ringColor = '#eab308'; labelText = 'Building momentum'; }
+  else { ringColor = totalScore > 0 ? '#f97316' : '#ccc'; labelText = totalScore > 0 ? 'Keep going' : 'Start your day'; }
+
+  // Animate ring on load
+  circle.style.strokeDashoffset = circ;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      circle.style.strokeDashoffset = circ * (1 - pct);
+    });
+  });
+  circle.style.stroke = ringColor;
+  document.getElementById('totalScore').style.color = ringColor;
+  const labelEl = document.getElementById('scoreLabel');
+  labelEl.textContent = labelText;
+  labelEl.style.color = ringColor;
+
+  // Category breakdown (inline)
+  const breakdownEl = document.getElementById('scoreBreakdown');
+  breakdownEl.innerHTML = catScores.filter(c => c.max > 0).map(({ cat, score }) =>
+    `<div class="score-ring-cat">${cat.icon} ${cat.name} <span>${score}</span></div>`
+  ).join('');
+
+  // Category chips (clickable filter)
+  document.getElementById('scoreChips').innerHTML = catScores.map(({ cat, score, max }) => `
     <div class="score-chip ${activeFilter === cat.id ? 'active' : ''}" onclick="toggleFilter('${cat.id}')">
       <div class="chip-name">${cat.icon} ${cat.name}</div>
       <span class="chip-score">${score}</span><span class="chip-max">/${max}</span>
