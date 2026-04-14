@@ -55,7 +55,7 @@
 
     .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); }
     .login-card { padding: 48px 32px; text-align: center; max-width: 340px; width: 90%; }
-    .login-logo { width: 48px; height: 48px; background: var(--primary); border-radius: 12px; display: grid; place-items: center; color: #000; font-weight: 700; font-size: 20px; margin: 0 auto 24px; box-shadow: var(--shadow-glow); }
+    .login-logo { width: 48px; height: 48px; background: var(--primary); border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 20px; margin: 0 auto 24px; box-shadow: var(--shadow-glow); }
     .login-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
     .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.5; }
     .google-btn { display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer; font-family: inherit; transition: border-color var(--t-fast); }
@@ -66,7 +66,7 @@
     .header { background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
     .header-inner { max-width: 640px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
     .header-brand { display: flex; align-items: center; gap: 8px; }
-    .header-logo { width: 24px; height: 24px; background: var(--primary); border-radius: 6px; display: grid; place-items: center; color: #000; font-weight: 700; font-size: 11px; }
+    .header-logo { width: 24px; height: 24px; background: var(--primary); border-radius: 6px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 11px; }
     .header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
     .header-right { display: flex; align-items: center; gap: 8px; }
     .date-nav { display: flex; align-items: center; }
@@ -197,7 +197,7 @@
     .intention-input-wrap { display: flex; gap: 8px; align-items: flex-start; }
     .intention-input { flex: 1; height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px; font-family: inherit; outline: none; color: var(--text); background: var(--bg); }
     .intention-input:focus { border-color: var(--text); }
-    .intention-save-btn { height: 36px; padding: 0 14px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .intention-save-btn { height: 36px; padding: 0 14px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; }
     .intention-save-btn:hover { opacity: 0.85; }
     .intention-counter { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right; }
     .intention-display { display: flex; align-items: center; gap: 8px; }
@@ -267,21 +267,21 @@
     .add-item-row input:first-child { flex: 1; }
     .add-item-row input:focus { border-color: var(--text); }
     .add-item-row input[type="number"] { width: 46px; text-align: center; }
-    .add-item-row button { height: 32px; padding: 0 14px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .add-item-row button { height: 32px; padding: 0 14px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
     .add-item-row button:hover { background: var(--primary-light); }
 
     .suggestions-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 0; border-top: 1px solid var(--border-light); margin-top: 2px; }
     .suggestions-label { width: 100%; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
     .suggestion-chip { padding: 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .suggestion-chip:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+    .suggestion-chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .ai-suggest-btn { display: flex; align-items: center; gap: 4px; padding: 4px 12px; background: var(--primary); border: none; border-radius: 6px; font-size: 11px; font-weight: 600; color: #000; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+    .ai-suggest-btn { display: flex; align-items: center; gap: 4px; padding: 4px 12px; background: var(--primary); border: none; border-radius: 6px; font-size: 11px; font-weight: 600; color: #fff; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
     .ai-suggest-btn:hover { opacity: 0.8; }
     .ai-suggest-btn:disabled { opacity: 0.3; cursor: wait; }
     .ai-suggest-btn svg { width: 11px; height: 11px; }
     .ai-suggestions { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0; }
     .ai-chip { padding: 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .ai-chip:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+    .ai-chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .add-category-btn { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 10px; background: none; border: 1px dashed var(--border); border-radius: var(--r); color: var(--text-muted); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; margin-bottom: 6px; }
     .add-category-btn:hover { border-color: var(--primary); color: var(--primary); }
@@ -311,7 +311,7 @@
     .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
     .modal-actions button { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; }
     .btn-cancel { background: var(--card); color: var(--text-sec); }
-    .btn-confirm { background: var(--primary); color: #000; font-weight: 600; }
+    .btn-confirm { background: var(--primary); color: #fff; font-weight: 600; }
     .btn-cancel:hover { background: var(--border); }
 
     .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
@@ -364,7 +364,7 @@
 
     /* Toast */
     .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 600; pointer-events: none; }
-    .toast { background: var(--primary); color: #000; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-glow); animation: toastIn 0.3s ease, toastOut 0.3s ease 3.7s forwards; white-space: nowrap; font-family: inherit; }
+    .toast { background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-glow); animation: toastIn 0.3s ease, toastOut 0.3s ease 3.7s forwards; white-space: nowrap; font-family: inherit; }
     @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(20px); } }
 
@@ -383,7 +383,7 @@
 
     .heatmap-filters { display: flex; gap: 4px; margin-bottom: 10px; }
     .heatmap-filter { padding: 4px 10px; border: 1px solid var(--border); background: var(--bg); border-radius: 20px; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: inherit; }
-    .heatmap-filter.active { background: var(--primary); color: #000; border-color: var(--primary); }
+    .heatmap-filter.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .heatmap-grid-wrap { display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .heatmap-labels { display: flex; flex-direction: column; gap: 3px; padding-right: 6px; padding-top: 18px; }
