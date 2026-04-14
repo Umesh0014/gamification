@@ -59,6 +59,21 @@
     .tab-content.active { display: block; }
 
     .score-bar { max-width: 640px; margin: 20px auto 0; padding: 0 20px; }
+    .backdate-banner {
+      max-width: 640px; margin: 10px auto 0; padding: 0 20px;
+    }
+    .backdate-banner-inner {
+      background: #fefce8; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: #92400e; font-weight: 500;
+    }
+    .backdate-banner-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+    .backdate-banner-today {
+      margin-left: auto; font-size: 11px; color: #b45309;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-weight: 600; text-decoration: underline;
+    }
+
     .score-ring-card { background: var(--card); border-radius: var(--r); padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: center; }
     .score-ring-wrap { position: relative; width: 140px; height: 140px; margin-bottom: 4px; }
     .score-ring-wrap svg { transform: rotate(-90deg); width: 140px; height: 140px; }
@@ -239,9 +254,9 @@
     </div>
     <div class="header-right">
       <div class="date-nav">
-        <button onclick="changeDate(-1)">&#8249;</button>
+        <button id="datePrev" onclick="changeDate(-1)">&#8249;</button>
         <div class="date-display" id="dateDisplay"></div>
-        <button onclick="changeDate(1)">&#8250;</button>
+        <button id="dateNext" onclick="changeDate(1)">&#8250;</button>
       </div>
       <div class="user-profile">
         <img class="user-avatar" id="userAvatar" src="" alt="" onclick="toggleUserMenu()">
@@ -263,6 +278,14 @@
 </div>
 
 <div class="tab-content active" id="tab-tracker">
+
+<div class="backdate-banner" id="backdateBanner" style="display:none">
+  <div class="backdate-banner-inner">
+    <div class="backdate-banner-dot"></div>
+    <span id="backdateText"></span>
+    <button class="backdate-banner-today" onclick="goToToday()">Go to today</button>
+  </div>
+</div>
 
 <div class="score-bar">
   <div class="score-ring-card">
@@ -526,7 +549,27 @@ function saveDayData(date, data) {
   if (currentUser) db.collection('users').doc(currentUser.uid).collection('days').doc(dk).set(data).catch(() => {});
 }
 
-function changeDate(d) { currentDate.setDate(currentDate.getDate() + d); render(); }
+const BACKDATE_LIMIT = 2;
+
+function daysFromToday(d) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const target = new Date(d);
+  target.setHours(0,0,0,0);
+  return Math.round((target - today) / 86400000);
+}
+
+function changeDate(delta) {
+  const next = new Date(currentDate);
+  next.setDate(next.getDate() + delta);
+  const diff = daysFromToday(next);
+  if (diff > 0 || diff < -BACKDATE_LIMIT) return; // block future & beyond limit
+  currentDate = next;
+  render();
+}
+
+function goToToday() { currentDate = new Date(); render(); }
+
 function isToday(d) { return d.toDateString() === new Date().toDateString(); }
 function formatDate(d) {
   const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -540,7 +583,27 @@ function render() {
   const cats = getCategories();
   const dayData = getDayData(currentDate);
   const dateEl = document.getElementById('dateDisplay');
-  dateEl.innerHTML = isToday(currentDate) ? `<div class="today-label">Today</div>${formatDate(currentDate)}` : formatDate(currentDate);
+  const diff = daysFromToday(currentDate);
+  let dateLabel = formatDate(currentDate);
+  if (diff === 0) dateLabel = `<div class="today-label">Today</div>${formatDate(currentDate)}`;
+  else if (diff === -1) dateLabel = `<div class="today-label" style="color:var(--amber)">Yesterday</div>${formatDate(currentDate)}`;
+  else if (diff === -2) dateLabel = `<div class="today-label" style="color:var(--amber)">2 days ago</div>${formatDate(currentDate)}`;
+  dateEl.innerHTML = dateLabel;
+
+  // Nav button states
+  document.getElementById('datePrev').disabled = diff <= -BACKDATE_LIMIT;
+  document.getElementById('datePrev').style.opacity = diff <= -BACKDATE_LIMIT ? '0.2' : '1';
+  document.getElementById('dateNext').disabled = diff >= 0;
+  document.getElementById('dateNext').style.opacity = diff >= 0 ? '0.2' : '1';
+
+  // Backdate banner
+  const banner = document.getElementById('backdateBanner');
+  if (diff < 0) {
+    banner.style.display = 'block';
+    document.getElementById('backdateText').textContent = `Editing ${formatDate(currentDate)}`;
+  } else {
+    banner.style.display = 'none';
+  }
 
   let totalScore = 0, totalMax = 0;
   const catScores = cats.map(cat => {
