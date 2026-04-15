@@ -633,6 +633,7 @@
 <div class="container">
   <button onclick="openAddCategoryModal()" style="width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px">+ Add habit</button>
   <button class="tpl-skip" style="font-size:12px;padding:4px;margin-bottom:4px" onclick="openTemplatePicker(false)">Or start from a template &rarr;</button>
+  <button class="tpl-skip" style="font-size:12px;padding:4px;margin-bottom:4px;color:var(--primary)" onclick="saveAsTemplate()">Save current setup as template</button>
 </div>
 
 <div class="container">
@@ -774,6 +775,11 @@ async function syncFromFirestore(user) {
     // Sync intentions
     const intSnap = await db.collection('users').doc(user.uid).collection('intentions').get();
     intSnap.forEach(doc => localStorage.setItem(user.uid + '_intention_' + doc.id, doc.data().intention));
+    // Sync custom templates
+    const tplSnap = await db.collection('users').doc(user.uid).collection('templates').get();
+    const tpls = [];
+    tplSnap.forEach(doc => tpls.push(doc.data()));
+    if (tpls.length > 0) localStorage.setItem(user.uid + '_custom_templates', JSON.stringify(tpls));
   } catch (e) { console.log('Sync error:', e); }
 }
 
@@ -1109,6 +1115,107 @@ function skipTemplates() {
   markOnboardingComplete();
   document.getElementById('tplOverlay').classList.remove('open');
 }
+
+function saveAsTemplate() {
+  const cats = getCategories();
+  if (cats.length === 0) { alert('No habits to save'); return; }
+  const name = prompt('Name your template:', 'My Daily Routine');
+  if (!name || !name.trim()) return;
+
+  const saved = JSON.parse(localStorage.getItem(userPrefix() + 'custom_templates') || '[]');
+  if (saved.length >= 5) { alert('Maximum 5 custom templates. Delete one first.'); return; }
+
+  const template = {
+    id: 'custom_' + Date.now(),
+    name: name.trim(),
+    icon: '⭐',
+    isCustom: true,
+    categories: cats.map(c => ({
+      name: c.name,
+      icon: c.icon,
+      color: c.color,
+      items: c.items.map(i => ({ name: i.name, points: i.points }))
+    }))
+  };
+
+  saved.push(template);
+  localStorage.setItem(userPrefix() + 'custom_templates', JSON.stringify(saved));
+
+  // Also save to Firestore
+  if (currentUser) {
+    db.collection('users').doc(currentUser.uid).collection('templates').doc(template.id).set(template).catch(() => {});
+  }
+
+  alert('Template "' + name.trim() + '" saved!');
+}
+
+function deleteCustomTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  const saved = JSON.parse(localStorage.getItem(userPrefix() + 'custom_templates') || '[]');
+  const updated = saved.filter(t => t.id !== id);
+  localStorage.setItem(userPrefix() + 'custom_templates', JSON.stringify(updated));
+  if (currentUser) {
+    db.collection('users').doc(currentUser.uid).collection('templates').doc(id).delete().catch(() => {});
+  }
+  openTemplatePicker(false);
+}
+
+function applyCustomTemplate(id) {
+  const saved = JSON.parse(localStorage.getItem(userPrefix() + 'custom_templates') || '[]');
+  const t = saved.find(x => x.id === id);
+  if (!t) return;
+
+  const cats = getCategories();
+  if (cats.length > 0) {
+    if (!confirm('This will add habits from "' + t.name + '" to your existing setup. Continue?')) return;
+  }
+
+  t.categories.forEach((c, ci) => {
+    const items = c.items.map((item, ii) => ({
+      id: 'ct' + Date.now() + '_' + ci + '_' + ii,
+      name: item.name,
+      max: 10,
+      value: 0,
+      points: item.points
+    }));
+    cats.push({
+      id: c.name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now() + '_' + ci,
+      name: c.name,
+      icon: c.icon,
+      color: c.color,
+      items
+    });
+  });
+
+  saveCategories(cats);
+  document.getElementById('tplOverlay').classList.remove('open');
+  render();
+  showToastQueue([{ icon: '✅', text: t.name + ' applied!', date: new Date().toISOString() }]);
+}
+
+// Override openTemplatePicker to include custom templates
+const _origOpenTemplatePicker = openTemplatePicker;
+openTemplatePicker = function(isOnboarding) {
+  _origOpenTemplatePicker(isOnboarding);
+
+  // Add custom templates at the top of the grid
+  const saved = JSON.parse(localStorage.getItem(userPrefix() + 'custom_templates') || '[]');
+  if (saved.length > 0) {
+    const grid = document.getElementById('tplGrid');
+    const customHtml = saved.map(t => {
+      const totalItems = t.categories.reduce((s, c) => s + c.items.length, 0);
+      const totalPts = t.categories.reduce((s, c) => s + c.items.reduce((ss, i) => ss + i.points, 0), 0);
+      return `<div class="tpl-card" style="border-color:var(--primary-border);position:relative" onclick="applyCustomTemplate('${t.id}')">
+        <button onclick="event.stopPropagation();deleteCustomTemplate('${t.id}')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px">&times;</button>
+        <div class="tpl-card-icon">${t.icon}</div>
+        <div class="tpl-card-name">${t.name}</div>
+        <div class="tpl-card-meta">${totalItems} items · ${totalPts} pts · ${t.categories.length} categories</div>
+        <div class="tpl-card-meta" style="margin-top:4px;color:var(--primary);font-weight:600">Your template</div>
+      </div>`;
+    }).join('');
+    grid.innerHTML = customHtml + grid.innerHTML;
+  }
+};
 
 function checkOnboarding() {
   if (!currentUser) return;
