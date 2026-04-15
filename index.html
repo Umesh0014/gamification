@@ -274,7 +274,14 @@
     .add-item-row button { height: 32px; padding: 0 14px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
     .add-item-row button:hover { background: var(--primary-light); }
 
-    .suggestions-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 0; border-top: 1px solid var(--border-light); margin-top: 2px; }
+    .suggestions-wrap { border-top: 1px solid var(--border-light); margin-top: 2px; }
+    .suggestions-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; cursor: pointer; user-select: none; }
+    .suggestions-toggle-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .suggestions-toggle-arrow { font-size: 9px; color: var(--text-muted); transition: transform 0.2s; }
+    .suggestions-wrap.collapsed .suggestions-toggle-arrow { transform: rotate(-90deg); }
+    .suggestions-wrap.collapsed .suggestions-body { display: none; }
+    .suggestions-body { padding-bottom: 4px; }
+    .suggestions-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 0; }
     .suggestions-label { width: 100%; font-size: 10px; font-weight: 500; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
     .suggestion-chip { padding: 4px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit; transition: all 0.15s; }
     .suggestion-chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -1472,20 +1479,25 @@ function render() {
           const sugs = getSuggestions(cat.name);
           const existing = cat.items.map(i => i.name.toLowerCase());
           const filtered = sugs ? sugs.filter(s => !existing.includes(s.toLowerCase())) : [];
-          let html = '';
-          if (filtered.length > 0) {
+          const hasSugs = filtered.length > 0;
+          let html = `<div class="suggestions-wrap collapsed">
+            <div class="suggestions-toggle" onclick="this.parentElement.classList.toggle('collapsed')">
+              <span class="suggestions-toggle-label">${hasSugs ? 'Suggestions' : 'AI Suggestions'}</span>
+              <span class="suggestions-toggle-arrow">&#9662;</span>
+            </div>
+            <div class="suggestions-body">`;
+          if (hasSugs) {
             html += `<div class="suggestions-row">
-              <div class="suggestions-label">Suggested items</div>
               ${filtered.map(s => `<button class="suggestion-chip" onclick="addSuggestion('${cat.id}','${s.replace(/'/g, "\\'")}')">${s}</button>`).join('')}
             </div>`;
           }
-          html += `<div style="padding:6px 0;display:flex;align-items:center;gap:8px;">
+          html += `<div style="padding:4px 0;display:flex;align-items:center;gap:8px;">
             <button class="ai-suggest-btn" id="aiBtn-${cat.id}" onclick="event.stopPropagation();aiSuggest('${cat.id}','${cat.name.replace(/'/g, "\\'")}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7z"/></svg>
               AI Suggest
             </button>
             <div class="ai-suggestions" id="aiSugs-${cat.id}"></div>
-          </div>`;
+          </div></div></div>`;
           return html;
         })()}
         <div class="add-item-row">
